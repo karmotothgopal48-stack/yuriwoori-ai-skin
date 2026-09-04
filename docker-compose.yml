@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: yuriwoori_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: yuriwoori_user
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: yuriwoori_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - yuriwoori_pgdata:/var/lib/postgresql/data
+
+volumes:
+  yuriwoori_pgdata:
