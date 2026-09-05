@@ -19,3 +19,8 @@
 
 ## Usage rule
 Every component built from Step 3 onward pulls colors from this table only — no new hex codes without adding them here first.
+
+## Typography (confirmed from prototype.html)
+- Display / headings: **Cormorant** (serif) — weights 400, 500, 600
+- Body / UI text: **Inter** (sans-serif) — weights 400, 500, 600, 700
+- Loaded via `next/font/google` in `frontend/src/app/layout.tsx`
