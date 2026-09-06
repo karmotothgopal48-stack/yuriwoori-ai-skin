@@ -76,4 +76,6 @@ export function uploadFrame(scanId: string, angle: string, imageBase64: string) 
 
 export function analyzeScan(scanId: string) {
   return api.post<SkinProfileResponse>(`/v1/scans/${scanId}/analyze`);
+}export function getScanProfile(scanId: string) {
+  return api.get<SkinProfileResponse>(`/v1/scans/${scanId}`);
 }

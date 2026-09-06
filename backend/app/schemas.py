@@ -10,3 +10,11 @@ class SkinProfileResponse(BaseModel):
     pore_visibility: float | None
     overall_score: float | None
     model_version: str | None
+    from datetime import datetime
+
+
+class PassportResponse(BaseModel):
+    skin_type: str | None
+    top_concerns: list[str]
+    overall_score: float | None
+    last_scanned_at: datetime | None

@@ -1,29 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { analyzeScan, SkinProfileResponse } from "@/lib/api";
+import { useRouter, useSearchParams } from "next/navigation";
+import { analyzeScan } from "@/lib/api";
 
 export default function AnalyzingPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const scanId = searchParams.get("scan_id");
-  const [profile, setProfile] = useState<SkinProfileResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!scanId) return;
-    analyzeScan(scanId).then(setProfile).catch(() => setError("Analysis failed."));
-  }, [scanId]);
+    analyzeScan(scanId)
+      .then(() => router.replace(`/scan/result?scan_id=${scanId}`))
+      .catch(() => setError("Analysis failed. Please try scanning again."));
+  }, [scanId, router]);
 
-  if (error) return <main className="min-h-screen flex items-center justify-center">{error}</main>;
-  if (!profile) return <main className="min-h-screen flex items-center justify-center text-brand-muted">Analyzing…</main>;
+  if (error) {
+    return <main className="min-h-screen flex items-center justify-center px-8 text-center">{error}</main>;
+  }
 
   return (
-    <main className="min-h-screen p-8">
-      <h1 className="font-display text-3xl mb-4">Skin Profile (raw — polished in Step 10)</h1>
-      <pre className="bg-bg-cream-alt p-4 rounded-lg text-sm overflow-auto">
-        {JSON.stringify(profile, null, 2)}
-      </pre>
+    <main className="min-h-screen flex flex-col items-center justify-center px-8">
+      <div className="w-24 h-24 rounded-full border border-border-soft relative mb-8 flex items-center justify-center">
+        <div className="absolute inset-[-1.5px] rounded-full border border-transparent border-t-brand-primary border-r-brand-primary animate-spin" />
+        <span className="font-display text-2xl text-brand-text">AI</span>
+      </div>
+      <p className="text-brand-muted text-sm">Analyzing your skin…</p>
     </main>
   );
 }
