@@ -1,44 +1,98 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import "@mediapipe/face_detection";
+import "@tensorflow/tfjs-core";
+import "@tensorflow/tfjs-backend-webgl";
+import * as faceDetection from "@tensorflow-models/face-detection";
 import { measureBrightness } from "@/lib/camera";
 
 export interface QualityState {
   lightingOk: boolean;
-  faceCentered: boolean; // real detection wired in Step 8
+  faceCentered: boolean;
   stillOk: boolean;
+  faceConfidence: number;
   allPassed: boolean;
 }
 
 export function useQualityGate(videoRef: React.RefObject<HTMLVideoElement>) {
   const canvasRef = useRef<HTMLCanvasElement>(document.createElement("canvas"));
+  const detectorRef = useRef<faceDetection.FaceDetector | null>(null);
+  const lastCenterRef = useRef<{ x: number; y: number } | null>(null);
   const [quality, setQuality] = useState<QualityState>({
     lightingOk: false,
     faceCentered: false,
     stillOk: false,
+    faceConfidence: 0,
     allPassed: false,
   });
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    let cancelled = false;
+
+    faceDetection
+      .createDetector(faceDetection.SupportedModels.MediaPipeFaceDetector, {
+        runtime: "tfjs",
+        maxFaces: 1,
+        modelType: "short",
+      })
+      .then((detector) => {
+        if (!cancelled) detectorRef.current = detector;
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
       const video = videoRef.current;
-      if (!video) return;
+      const detector = detectorRef.current;
+      if (!video || !detector || video.videoWidth === 0) return;
 
       const brightness = measureBrightness(video, canvasRef.current);
-      const lightingOk = brightness > 40 && brightness < 220 * 0.86; // simple usable-range check
+      const lightingOk = brightness > 40 && brightness < 190;
 
-      // Placeholder until Step 8 wires the real CV face-detection service:
-      const faceCentered = true;
-      const stillOk = true;
+      const faces = await detector.estimateFaces(video, { flipHorizontal: false });
 
-      const next = {
+      let faceCentered = false;
+      let stillOk = false;
+      let faceConfidence = 0;
+
+      if (faces.length > 0) {
+        const box = faces[0].box;
+        faceConfidence = 1;
+
+        const centerX = box.xMin + box.width / 2;
+        const centerY = box.yMin + box.height / 2;
+        const videoCenterX = video.videoWidth / 2;
+        const videoCenterY = video.videoHeight / 2;
+
+        const offsetX = Math.abs(centerX - videoCenterX) / video.videoWidth;
+        const offsetY = Math.abs(centerY - videoCenterY) / video.videoHeight;
+        faceCentered = offsetX < 0.15 && offsetY < 0.15;
+
+        if (lastCenterRef.current) {
+          const movement = Math.hypot(
+            centerX - lastCenterRef.current.x,
+            centerY - lastCenterRef.current.y
+          );
+          stillOk = movement < video.videoWidth * 0.02;
+        }
+        lastCenterRef.current = { x: centerX, y: centerY };
+      } else {
+        lastCenterRef.current = null;
+      }
+
+      setQuality({
         lightingOk,
         faceCentered,
         stillOk,
+        faceConfidence,
         allPassed: lightingOk && faceCentered && stillOk,
-      };
-      setQuality(next);
-    }, 400);
+      });
+    }, 350);
 
     return () => clearInterval(interval);
   }, [videoRef]);

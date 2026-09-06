@@ -38,3 +38,26 @@ export interface HealthResponse {
 export function getHealth() {
   return api.get<HealthResponse>("/v1/health");
 }
+export interface ScanCreateResponse {
+  scan_id: string;
+}
+
+export interface FrameQualityResponse {
+  frame_id: string;
+  angle: string;
+  blur_score: number;
+  lighting_score: number;
+  quality_score: number;
+  passed: boolean;
+}
+
+export function createScan() {
+  return api.post<ScanCreateResponse>("/v1/scans");
+}
+
+export function uploadFrame(scanId: string, angle: string, imageBase64: string) {
+  return api.post<FrameQualityResponse>(`/v1/scans/${scanId}/frames`, {
+    angle,
+    image_base64: imageBase64,
+  });
+}

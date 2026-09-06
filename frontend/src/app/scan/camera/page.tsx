@@ -5,6 +5,7 @@ import { getCameraStream, stopCameraStream, captureFrame } from "@/lib/camera";
 import { FaceTracker } from "@/components/camera/FaceTracker";
 import { useQualityGate, StatusPills } from "@/components/camera/QualityGate";
 import { useCountdown, CountdownDisplay } from "@/components/camera/CountdownCapture";
+import { createScan, uploadFrame } from "@/lib/api";
 
 type Angle = "front" | "left" | "right";
 const ANGLES: { key: Angle; caption: string }[] = [
@@ -18,6 +19,9 @@ export default function CameraPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [angleIndex, setAngleIndex] = useState(0);
+  const [scanId, setScanId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [retakeMessage, setRetakeMessage] = useState<string | null>(null);
   const [captures, setCaptures] = useState<Record<Angle, string | null>>({
     front: null,
     left: null,
@@ -26,14 +30,34 @@ export default function CameraPage() {
 
   const quality = useQualityGate(videoRef);
   const currentAngle = ANGLES[angleIndex];
-  const capturingActive = quality.allPassed && !captures[currentAngle.key];
+  const capturingActive = quality.allPassed && !captures[currentAngle.key] && !uploading;
 
-  const handleCapture = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
+  useEffect(() => {
+    createScan()
+      .then((res) => setScanId(res.scan_id))
+      .catch(() => setError("Could not start scan session. Is the backend running?"));
+  }, []);
+
+  const handleCapture = useCallback(async () => {
+    if (!videoRef.current || !canvasRef.current || !scanId) return;
     const dataUrl = captureFrame(videoRef.current, canvasRef.current);
-    setCaptures((prev) => ({ ...prev, [currentAngle.key]: dataUrl }));
-    setAngleIndex((prev) => Math.min(prev + 1, ANGLES.length - 1));
-  }, [currentAngle.key]);
+
+    setUploading(true);
+    setRetakeMessage(null);
+    try {
+      const result = await uploadFrame(scanId, currentAngle.key, dataUrl);
+      if (result.passed) {
+        setCaptures((prev) => ({ ...prev, [currentAngle.key]: dataUrl }));
+        setAngleIndex((prev) => Math.min(prev + 1, ANGLES.length - 1));
+      } else {
+        setRetakeMessage("That one came out blurry or too dark — hold still, we'll try again.");
+      }
+    } catch {
+      setRetakeMessage("Upload failed — check your connection and try again.");
+    } finally {
+      setUploading(false);
+    }
+  }, [currentAngle.key, scanId]);
 
   const count = useCountdown(capturingActive, handleCapture);
 
@@ -66,9 +90,9 @@ export default function CameraPage() {
         <CountdownDisplay count={count} />
 
         {!allCaptured && (
-          <div className="absolute bottom-[120px] left-0 right-0 text-center z-10">
+          <div className="absolute bottom-[120px] left-0 right-0 text-center z-10 px-8">
             <p className="font-display italic text-[22px]" style={{ color: "#F3F1EA" }}>
-              {currentAngle.caption}
+              {retakeMessage ?? currentAngle.caption}
             </p>
           </div>
         )}
