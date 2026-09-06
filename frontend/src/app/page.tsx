@@ -1,8 +1,8 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import { useEffect, useState } from "react";
 import { getHealth } from "@/lib/api";
-
+import Link from "next/link";
 export default function Home() {
   const [backendStatus, setBackendStatus] = useState<"checking" | "online" | "offline">("checking");
 
@@ -43,9 +43,12 @@ export default function Home() {
       </div>
 
       <div className="flex gap-4">
-        <button className="bg-brand-primary text-white px-6 py-3 rounded-full hover:bg-brand-primary-light transition">
-          Start Skin Scan
-        </button>
+        <Link
+  href="/scan/camera"
+  className="bg-brand-primary text-white px-6 py-3 rounded-full hover:bg-brand-primary-light transition"
+>
+  Start Skin Scan
+</Link>
         <button className="border border-border-soft text-brand-text px-6 py-3 rounded-full hover:bg-bg-cream-alt transition">
           Explore Products
         </button>
