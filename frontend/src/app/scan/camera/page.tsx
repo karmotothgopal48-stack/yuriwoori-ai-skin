@@ -15,6 +15,7 @@ const ANGLES: { key: Angle; caption: string }[] = [
 ];
 
 export default function CameraPage() {
+  const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +76,12 @@ export default function CameraPage() {
 
   const allCaptured = ANGLES.every((a) => captures[a.key]);
 
+  useEffect(() => {
+    if (allCaptured && scanId) {
+      router.push(`/scan/analyzing?scan_id=${scanId}`);
+    }
+  }, [allCaptured, scanId, router]);
+
   return (
     <div className="min-h-screen bg-[#15140F] flex flex-col">
       <div className="flex-1 relative overflow-hidden">
@@ -119,10 +126,4 @@ export default function CameraPage() {
       </div>
     </div>
   );
-}  const router = useRouter();
-
-  useEffect(() => {
-    if (allCaptured && scanId) {
-      router.push(`/scan/analyzing?scan_id=${scanId}`);
-    }
-  }, [allCaptured, scanId, router]);
+}

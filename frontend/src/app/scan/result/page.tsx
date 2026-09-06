@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getScanProfile, SkinProfileResponse } from "@/lib/api";
 import { RadialScore } from "@/components/skin/RadialScore";
 import { SkinTypeBadge } from "@/components/skin/SkinTypeBadge";
 
-export default function ResultPage() {
+function ResultContent() {
   const searchParams = useSearchParams();
   const scanId = searchParams.get("scan_id");
   const [profile, setProfile] = useState<SkinProfileResponse | null>(null);
@@ -63,5 +63,15 @@ export default function ResultPage() {
         </Link>
       </div>
     </main>
+  );
+}
+
+export default function ResultPage() {
+  // useSearchParams() requires a Suspense boundary around the component that
+  // calls it, or `next build` fails to prerender this route.
+  return (
+    <Suspense fallback={null}>
+      <ResultContent />
+    </Suspense>
   );
 }

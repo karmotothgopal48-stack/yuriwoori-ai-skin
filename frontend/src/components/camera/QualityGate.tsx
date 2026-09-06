@@ -15,8 +15,14 @@ export interface QualityState {
   allPassed: boolean;
 }
 
-export function useQualityGate(videoRef: React.RefObject<HTMLVideoElement>) {
-  const canvasRef = useRef<HTMLCanvasElement>(document.createElement("canvas"));
+export function useQualityGate(videoRef: React.RefObject<HTMLVideoElement | null>) {
+  // Lazily create the offscreen canvas on first render. `document` doesn't
+  // exist during server-side prerendering, so it can't be created eagerly
+  // as the useRef initial value.
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  if (canvasRef.current === null && typeof document !== "undefined") {
+    canvasRef.current = document.createElement("canvas");
+  }
   const detectorRef = useRef<faceDetection.FaceDetector | null>(null);
   const lastCenterRef = useRef<{ x: number; y: number } | null>(null);
   const [quality, setQuality] = useState<QualityState>({
@@ -49,9 +55,10 @@ export function useQualityGate(videoRef: React.RefObject<HTMLVideoElement>) {
     const interval = setInterval(async () => {
       const video = videoRef.current;
       const detector = detectorRef.current;
-      if (!video || !detector || video.videoWidth === 0) return;
+      const canvas = canvasRef.current;
+      if (!video || !detector || !canvas || video.videoWidth === 0) return;
 
-      const brightness = measureBrightness(video, canvasRef.current);
+      const brightness = measureBrightness(video, canvas);
       const lightingOk = brightness > 40 && brightness < 190;
 
       const faces = await detector.estimateFaces(video, { flipHorizontal: false });
