@@ -63,4 +63,14 @@ class RecommendationResponse(BaseModel):
     price: float | None
     image_url: str | None
     match_reason: str
-    rank: int
+    rank: intclass RoutineStepResponse(BaseModel):
+    step_order: int
+    product_id: uuid.UUID
+    product_name: str
+    image_url: str | None
+    reason: str
+
+
+class RoutineResponse(BaseModel):
+    AM: list[RoutineStepResponse]
+    PM: list[RoutineStepResponse]

@@ -116,4 +116,19 @@ export function getProducts() {
 
 export function getRecommendations(scanId: string) {
   return api.get<RecommendationResponse[]>(`/v1/scans/${scanId}/recommendations`);
+}export interface RoutineStepResponse {
+  step_order: number;
+  product_id: string;
+  product_name: string;
+  image_url: string | null;
+  reason: string;
+}
+
+export interface RoutineResponse {
+  AM: RoutineStepResponse[];
+  PM: RoutineStepResponse[];
+}
+
+export function getRoutine(scanId: string) {
+  return api.get<RoutineResponse>(`/v1/scans/${scanId}/routine`);
 }

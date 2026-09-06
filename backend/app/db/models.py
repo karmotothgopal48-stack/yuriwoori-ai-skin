@@ -90,7 +90,7 @@ class SkinPassport(Base):
     top_concerns: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
     overall_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     last_scanned_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-class Product(Base):
+    class Product(Base):
     __tablename__ = "products"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -104,7 +104,6 @@ class Product(Base):
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     product_url: Mapped[str | None] = mapped_column(String, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
-    concern_tags: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
 
 
 class Ingredient(Base):
@@ -138,15 +137,32 @@ class IngredientInteraction(Base):
     ingredient_a_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
     ingredient_b_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
     relationship_type: Mapped[IngredientInteractionType] = mapped_column(Enum(IngredientInteractionType))
-    explanation: Mapped[str | None] = mapped_column(String, nullable=True)
+    explanation: Mapped[str | None] = mapped_column(String, nullable=True)class TimeOfDay(str, enum.Enum):
+    AM = "AM"
+    PM = "PM"
 
-class Recommendation(Base):
-    __tablename__ = "recommendations"
+
+class Routine(Base):
+    __tablename__ = "routines"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     skin_profile_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("skin_profiles.id"))
-    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"))
-    rank: Mapped[int] = mapped_column(Integer)
-    match_reason: Mapped[str] = mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    steps: Mapped[list["RoutineStep"]] = relationship(back_populates="routine")
+
+
+class RoutineStep(Base):
+    __tablename__ = "routine_steps"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    routine_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("routines.id"))
+    time_of_day: Mapped[TimeOfDay] = mapped_column(Enum(TimeOfDay))
+    step_order: Mapped[int] = mapped_column(Integer)
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"))
+    reason: Mapped[str] = mapped_column(String)
+    concern_addressed: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    routine: Mapped["Routine"] = relationship(back_populates="steps")
+    product: Mapped["Product"] = relationship()

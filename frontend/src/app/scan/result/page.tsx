@@ -70,6 +70,11 @@ function ResultContent() {
           className="block text-center mt-3 border border-border-soft text-brand-text px-6 py-3 rounded-full hover:bg-bg-cream-alt transition"
         >
           See Matched Products
+        </Link><Link
+          href={`/routine?scan_id=${scanId}`}
+          className="block text-center mt-3 border border-border-soft text-brand-text px-6 py-3 rounded-full hover:bg-bg-cream-alt transition"
+        >
+          Build My Routine
         </Link>
 export default function ResultPage() {
   // useSearchParams() requires a Suspense boundary around the component that

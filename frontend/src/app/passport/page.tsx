@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { saveToPassport, getPassport, PassportResponse } from "@/lib/api";
 
-export default function PassportPage() {
+function PassportContent() {
   const searchParams = useSearchParams();
   const scanId = searchParams.get("scan_id");
   const [passport, setPassport] = useState<PassportResponse | null>(null);
@@ -50,5 +50,15 @@ export default function PassportPage() {
           : ""}
       </p>
     </main>
+  );
+}
+
+export default function PassportPage() {
+  // useSearchParams() requires a Suspense boundary around the component that
+  // calls it, or `next build` fails to prerender this route.
+  return (
+    <Suspense fallback={null}>
+      <PassportContent />
+    </Suspense>
   );
 }

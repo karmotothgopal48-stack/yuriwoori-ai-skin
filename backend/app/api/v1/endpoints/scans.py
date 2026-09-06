@@ -1,3 +1,7 @@
+from app.db.models import Routine, RoutineStep, TimeOfDay
+from app.services.routine_builder import build_routine
+from app.schemas import RoutineResponse, RoutineStepResponse
+
 from app.db.models import Recommendation
 from app.services.recommendation import build_recommendations
 from app.schemas import RecommendationResponse
@@ -191,3 +195,63 @@ def get_recommendations(scan_id: uuid.UUID, db: Session = Depends(get_db)):
         )
     db.commit()
     return response
+@router.get("/{scan_id}/routine", response_model=RoutineResponse)
+def get_routine(scan_id: uuid.UUID, db: Session = Depends(get_db)):
+    profile = db.query(SkinProfile).filter(SkinProfile.scan_id == scan_id).first()
+    if not profile:
+        raise HTTPException(status_code=400, detail="Scan has no analyzed profile yet")
+
+    existing_routine = db.query(Routine).filter(Routine.skin_profile_id == profile.id).first()
+    if existing_routine:
+        am_steps = [s for s in existing_routine.steps if s.time_of_day == TimeOfDay.AM]
+        pm_steps = [s for s in existing_routine.steps if s.time_of_day == TimeOfDay.PM]
+
+        def to_response(steps):
+            return [
+                RoutineStepResponse(
+                    step_order=s.step_order,
+                    product_id=s.product_id,
+                    product_name=s.product.name,
+                    image_url=s.product.image_url,
+                    reason=s.reason,
+                )
+                for s in sorted(steps, key=lambda s: s.step_order)
+            ]
+
+        return RoutineResponse(AM=to_response(am_steps), PM=to_response(pm_steps))
+
+    built = build_routine(db, profile)
+    routine = Routine(user_id=profile.user_id, skin_profile_id=profile.id)
+    db.add(routine)
+    db.flush()
+
+    def persist(period: str, picks: list[dict]):
+        for pick in picks:
+            db.add(
+                RoutineStep(
+                    routine_id=routine.id,
+                    time_of_day=TimeOfDay[period],
+                    step_order=pick["step_order"],
+                    product_id=pick["product"].id,
+                    reason=pick["reason"],
+                    concern_addressed=pick["step"],
+                )
+            )
+
+    persist("AM", built["AM"])
+    persist("PM", built["PM"])
+    db.commit()
+
+    def to_response_new(picks):
+        return [
+            RoutineStepResponse(
+                step_order=p["step_order"],
+                product_id=p["product"].id,
+                product_name=p["product"].name,
+                image_url=p["product"].image_url,
+                reason=p["reason"],
+            )
+            for p in picks
+        ]
+
+    return RoutineResponse(AM=to_response_new(built["AM"]), PM=to_response_new(built["PM"]))
