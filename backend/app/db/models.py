@@ -104,6 +104,7 @@ class Product(Base):
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     product_url: Mapped[str | None] = mapped_column(String, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    concern_tags: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
 
 
 class Ingredient(Base):
@@ -138,3 +139,14 @@ class IngredientInteraction(Base):
     ingredient_b_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
     relationship_type: Mapped[IngredientInteractionType] = mapped_column(Enum(IngredientInteractionType))
     explanation: Mapped[str | None] = mapped_column(String, nullable=True)
+
+class Recommendation(Base):
+    __tablename__ = "recommendations"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    skin_profile_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("skin_profiles.id"))
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"))
+    rank: Mapped[int] = mapped_column(Integer)
+    match_reason: Mapped[str] = mapped_column(String)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

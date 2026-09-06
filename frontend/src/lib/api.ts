@@ -78,8 +78,6 @@ export function analyzeScan(scanId: string) {
   return api.post<SkinProfileResponse>(`/v1/scans/${scanId}/analyze`);
 }export function getScanProfile(scanId: string) {
   return api.get<SkinProfileResponse>(`/v1/scans/${scanId}`);
-}export function getScanProfile(scanId: string) {
-  return api.get<SkinProfileResponse>(`/v1/scans/${scanId}`);
 }export interface PassportResponse {
   skin_type: string | null;
   top_concerns: string[];
@@ -107,4 +105,15 @@ export function getPassport() {
 
 export function getProducts() {
   return api.get<ProductResponse[]>("/v1/products");
+}export interface RecommendationResponse {
+  product_id: string;
+  name: string;
+  price: number | null;
+  image_url: string | null;
+  match_reason: string;
+  rank: number;
+}
+
+export function getRecommendations(scanId: string) {
+  return api.get<RecommendationResponse[]>(`/v1/scans/${scanId}/recommendations`);
 }

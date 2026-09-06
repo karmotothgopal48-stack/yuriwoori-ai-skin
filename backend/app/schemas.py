@@ -1,3 +1,27 @@
+import uuid
+from datetime import datetime
+
+from pydantic import BaseModel
+
+
+class ScanCreateResponse(BaseModel):
+    scan_id: uuid.UUID
+
+
+class FrameUploadRequest(BaseModel):
+    angle: str
+    image_base64: str
+
+
+class FrameQualityResponse(BaseModel):
+    frame_id: uuid.UUID
+    angle: str
+    blur_score: float
+    lighting_score: float
+    quality_score: float
+    passed: bool
+
+
 class SkinProfileResponse(BaseModel):
     scan_id: uuid.UUID
     skin_type: str | None
@@ -10,7 +34,6 @@ class SkinProfileResponse(BaseModel):
     pore_visibility: float | None
     overall_score: float | None
     model_version: str | None
-    from datetime import datetime
 
 
 class PassportResponse(BaseModel):
@@ -18,15 +41,9 @@ class PassportResponse(BaseModel):
     top_concerns: list[str]
     overall_score: float | None
     last_scanned_at: datetime | None
-    from datetime import datetime
 
 
-class PassportResponse(BaseModel):
-    skin_type: str | None
-    top_concerns: list[str]
-    overall_score: float | None
-    last_scanned_at: datetime | None
-    class ProductResponse(BaseModel):
+class ProductResponse(BaseModel):
     id: uuid.UUID
     name: str
     price: float | None
@@ -39,3 +56,11 @@ class PassportResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class RecommendationResponse(BaseModel):
+    product_id: uuid.UUID
+    name: str
+    price: float | None
+    image_url: str | None
+    match_reason: str
+    rank: int

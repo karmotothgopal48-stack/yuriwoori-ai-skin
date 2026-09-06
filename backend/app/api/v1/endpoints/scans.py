@@ -1,3 +1,7 @@
+from app.db.models import Recommendation
+from app.services.recommendation import build_recommendations
+from app.schemas import RecommendationResponse
+
 import os
 import base64
 import uuid
@@ -144,3 +148,46 @@ def get_scan_profile(scan_id: uuid.UUID, db: Session = Depends(get_db)):
         overall_score=profile.overall_score,
         model_version=profile.model_version,
     )
+@router.get("/{scan_id}/recommendations", response_model=list[RecommendationResponse])
+def get_recommendations(scan_id: uuid.UUID, db: Session = Depends(get_db)):
+    profile = db.query(SkinProfile).filter(SkinProfile.scan_id == scan_id).first()
+    if not profile:
+        raise HTTPException(status_code=400, detail="Scan has no analyzed profile yet")
+
+    existing = db.query(Recommendation).filter(Recommendation.skin_profile_id == profile.id).all()
+    if existing:
+        return [
+            RecommendationResponse(
+                product_id=r.product_id,
+                name=r.product.name,
+                price=r.product.price,
+                image_url=r.product.image_url,
+                match_reason=r.match_reason,
+                rank=r.rank,
+            )
+            for r in sorted(existing, key=lambda r: r.rank)
+        ]
+
+    results = build_recommendations(db, profile)
+    response = []
+    for rank, item in enumerate(results, start=1):
+        rec = Recommendation(
+            user_id=profile.user_id,
+            skin_profile_id=profile.id,
+            product_id=item["product"].id,
+            rank=rank,
+            match_reason=item["match_reason"],
+        )
+        db.add(rec)
+        response.append(
+            RecommendationResponse(
+                product_id=item["product"].id,
+                name=item["product"].name,
+                price=item["product"].price,
+                image_url=item["product"].image_url,
+                match_reason=item["match_reason"],
+                rank=rank,
+            )
+        )
+    db.commit()
+    return response
