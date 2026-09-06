@@ -90,3 +90,51 @@ class SkinPassport(Base):
     top_concerns: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
     overall_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     last_scanned_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+class Product(Base):
+    __tablename__ = "products"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    shopify_product_id: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    price: Mapped[float | None] = mapped_column(Float, nullable=True)
+    currency: Mapped[str] = mapped_column(String, default="INR")
+    image_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    category: Mapped[str | None] = mapped_column(String, nullable=True)
+    routine_step: Mapped[str | None] = mapped_column(String, nullable=True)
+    description: Mapped[str | None] = mapped_column(String, nullable=True)
+    product_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class Ingredient(Base):
+    __tablename__ = "ingredients"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    inci_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    function: Mapped[str | None] = mapped_column(String, nullable=True)
+    concern_tags: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
+
+
+class ProductIngredient(Base):
+    __tablename__ = "product_ingredients"
+
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"), primary_key=True)
+    ingredient_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ingredients.id"), primary_key=True)
+    concentration_note: Mapped[str | None] = mapped_column(String, nullable=True)
+
+
+class IngredientInteractionType(str, enum.Enum):
+    synergistic = "synergistic"
+    caution = "caution"
+    avoid_same_routine = "avoid_same_routine"
+
+
+class IngredientInteraction(Base):
+    __tablename__ = "ingredient_interactions"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    ingredient_a_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
+    ingredient_b_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
+    relationship_type: Mapped[IngredientInteractionType] = mapped_column(Enum(IngredientInteractionType))
+    explanation: Mapped[str | None] = mapped_column(String, nullable=True)

@@ -26,3 +26,16 @@ class PassportResponse(BaseModel):
     top_concerns: list[str]
     overall_score: float | None
     last_scanned_at: datetime | None
+    class ProductResponse(BaseModel):
+    id: uuid.UUID
+    name: str
+    price: float | None
+    currency: str
+    image_url: str | None
+    category: str | None
+    routine_step: str | None
+    description: str | None
+    product_url: str | None
+
+    class Config:
+        from_attributes = True

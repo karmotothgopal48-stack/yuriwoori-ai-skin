@@ -93,4 +93,18 @@ export function saveToPassport(scanId: string) {
 
 export function getPassport() {
   return api.get<PassportResponse>("/v1/passport");
+}export interface ProductResponse {
+  id: string;
+  name: string;
+  price: number | null;
+  currency: string;
+  image_url: string | null;
+  category: string | null;
+  routine_step: string | null;
+  description: string | null;
+  product_url: string | null;
+}
+
+export function getProducts() {
+  return api.get<ProductResponse[]>("/v1/products");
 }
