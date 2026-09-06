@@ -1,10 +1,10 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { analyzeScan } from "@/lib/api";
 
-function AnalyzingContent() {
+export default function AnalyzingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const scanId = searchParams.get("scan_id");
@@ -29,15 +29,5 @@ function AnalyzingContent() {
       </div>
       <p className="text-brand-muted text-sm">Analyzing your skin…</p>
     </main>
-  );
-}
-
-export default function AnalyzingPage() {
-  // useSearchParams() requires a Suspense boundary around the component that
-  // calls it, or `next build` fails to prerender this route.
-  return (
-    <Suspense fallback={null}>
-      <AnalyzingContent />
-    </Suspense>
   );
 }

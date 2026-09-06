@@ -18,3 +18,11 @@ class PassportResponse(BaseModel):
     top_concerns: list[str]
     overall_score: float | None
     last_scanned_at: datetime | None
+    from datetime import datetime
+
+
+class PassportResponse(BaseModel):
+    skin_type: str | None
+    top_concerns: list[str]
+    overall_score: float | None
+    last_scanned_at: datetime | None
