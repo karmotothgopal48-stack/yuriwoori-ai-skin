@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCameraStream, stopCameraStream, captureFrame } from "@/lib/camera";
 import { FaceTracker } from "@/components/camera/FaceTracker";
@@ -119,4 +119,10 @@ export default function CameraPage() {
       </div>
     </div>
   );
-}
+}  const router = useRouter();
+
+  useEffect(() => {
+    if (allCaptured && scanId) {
+      router.push(`/scan/analyzing?scan_id=${scanId}`);
+    }
+  }, [allCaptured, scanId, router]);

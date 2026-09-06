@@ -60,4 +60,20 @@ export function uploadFrame(scanId: string, angle: string, imageBase64: string) 
     angle,
     image_base64: imageBase64,
   });
+}export interface SkinProfileResponse {
+  scan_id: string;
+  skin_type: string | null;
+  hydration: number | null;
+  oiliness: number | null;
+  texture: number | null;
+  redness: number | null;
+  pigmentation: number | null;
+  blemish_index: number | null;
+  pore_visibility: number | null;
+  overall_score: number | null;
+  model_version: string | null;
+}
+
+export function analyzeScan(scanId: string) {
+  return api.post<SkinProfileResponse>(`/v1/scans/${scanId}/analyze`);
 }
