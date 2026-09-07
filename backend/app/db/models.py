@@ -1,4 +1,4 @@
-﻿from pgvector.sqlalchemy import Vector
+from pgvector.sqlalchemy import Vector
 import uuid
 from datetime import datetime
 from sqlalchemy import String, Boolean, Float, Integer, DateTime, ForeignKey, ARRAY, Enum
@@ -263,3 +263,47 @@ class ProgressSnapshot(Base):
     pigmentation: Mapped[float | None] = mapped_column(Float, nullable=True)
     blemish_index: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    class Cart(Base):
+    __tablename__ = "carts"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    shopify_cart_id: Mapped[str | None] = mapped_column(String, nullable=True)  # populated in Step 19
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    items: Mapped[list["CartItem"]] = relationship(back_populates="cart")
+
+
+class CartItem(Base):
+    __tablename__ = "cart_items"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    cart_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("carts.id"))
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"))
+    quantity: Mapped[int] = mapped_column(Integer, default=1)
+
+    cart: Mapped["Cart"] = relationship(back_populates="items")
+    product: Mapped["Product"] = relationship()
+    class Cart(Base):
+    __tablename__ = "carts"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    shopify_cart_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    items: Mapped[list["CartItem"]] = relationship(back_populates="cart")
+
+
+class CartItem(Base):
+    __tablename__ = "cart_items"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    cart_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("carts.id"))
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"))
+    quantity: Mapped[int] = mapped_column(Integer, default=1)
+
+    cart: Mapped["Cart"] = relationship(back_populates="items")
+    product: Mapped["Product"] = relationship()

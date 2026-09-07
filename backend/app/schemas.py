@@ -129,3 +129,20 @@ class MeaningfulChange(BaseModel):
 class ProgressResponse(BaseModel):
     snapshots: list[SnapshotEntry]
     meaningful_changes: list[MeaningfulChange]
+    class ShoppingAgentRequest(BaseModel):
+    message: str
+    scan_id: uuid.UUID | None = None
+
+
+class AgentLineItem(BaseModel):
+    name: str
+    step: str | None
+    price: float | None
+
+
+class ShoppingAgentResponse(BaseModel):
+    cart_id: uuid.UUID
+    items: list[AgentLineItem]
+    total: float
+    budget: float
+    tags: list[str]

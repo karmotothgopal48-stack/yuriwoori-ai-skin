@@ -201,4 +201,23 @@ export interface ProgressResponse {
 
 export function getProgress(userId: string) {
   return api.get<ProgressResponse>(`/v1/progress/${userId}`);
+}export interface AgentLineItem {
+  name: string;
+  step: string | null;
+  price: number | null;
+}
+
+export interface ShoppingAgentResponse {
+  cart_id: string;
+  items: AgentLineItem[];
+  total: number;
+  budget: number;
+  tags: string[];
+}
+
+export function buildAgentRoutine(message: string, scanId?: string) {
+  return api.post<ShoppingAgentResponse>("/v1/shopping-agent/build", {
+    message,
+    scan_id: scanId ?? null,
+  });
 }
