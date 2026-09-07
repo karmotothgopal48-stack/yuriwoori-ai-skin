@@ -176,4 +176,29 @@ export interface ProductDetailResponse {
 
 export function getProductDetail(productId: string) {
   return api.get<ProductDetailResponse>(`/v1/products/${productId}`);
+}export interface SnapshotEntry {
+  day_offset: number;
+  hydration: number | null;
+  oiliness: number | null;
+  texture: number | null;
+  redness: number | null;
+  pigmentation: number | null;
+  blemish_index: number | null;
+}
+
+export interface MeaningfulChange {
+  metric: string;
+  start: number;
+  latest: number;
+  delta: number;
+  direction: string;
+}
+
+export interface ProgressResponse {
+  snapshots: SnapshotEntry[];
+  meaningful_changes: MeaningfulChange[];
+}
+
+export function getProgress(userId: string) {
+  return api.get<ProgressResponse>(`/v1/progress/${userId}`);
 }

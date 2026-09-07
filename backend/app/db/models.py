@@ -249,3 +249,17 @@ class CoachMessage(Base):
 
     conversation: Mapped["CoachConversation"] = relationship(back_populates="messages")
 
+class ProgressSnapshot(Base):
+    __tablename__ = "progress_snapshots"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    scan_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("scans.id"))
+    day_offset: Mapped[int] = mapped_column(Integer)
+    hydration: Mapped[float | None] = mapped_column(Float, nullable=True)
+    oiliness: Mapped[float | None] = mapped_column(Float, nullable=True)
+    texture: Mapped[float | None] = mapped_column(Float, nullable=True)
+    redness: Mapped[float | None] = mapped_column(Float, nullable=True)
+    pigmentation: Mapped[float | None] = mapped_column(Float, nullable=True)
+    blemish_index: Mapped[float | None] = mapped_column(Float, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

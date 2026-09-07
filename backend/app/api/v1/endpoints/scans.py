@@ -1,3 +1,4 @@
+from app.db.models import ProgressSnapshot
 from app.services.ingredient_compatibility import check_routine_compatibility
 from app.schemas import CompatibilityFlagResponse
 from app.db.models import Routine, RoutineStep, TimeOfDay
@@ -113,7 +114,29 @@ def analyze_scan(scan_id: uuid.UUID, db: Session = Depends(get_db)):
     )
     db.add(profile)
     scan.status = ScanStatus.analyzed
-    db.commit()
+                first_snapshot = (
+        db.query(ProgressSnapshot)
+        .filter(ProgressSnapshot.user_id == scan.user_id)
+        .order_by(ProgressSnapshot.created_at)
+        .first()
+    )
+    day_offset = (profile.created_at - first_snapshot.created_at).days if first_snapshot else 0
+
+    db.add(
+        ProgressSnapshot(
+            user_id=scan.user_id,
+            scan_id=scan_id,
+            day_offset=day_offset,
+            hydration=profile.hydration,
+            oiliness=profile.oiliness,
+            texture=profile.texture,
+            redness=profile.redness,
+            pigmentation=profile.pigmentation,
+            blemish_index=profile.blemish_index,
+        )
+    )
+
+db.commit()
     db.refresh(profile)
 
     return SkinProfileResponse(

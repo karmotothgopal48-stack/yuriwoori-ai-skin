@@ -108,3 +108,24 @@ class ProductDetailResponse(BaseModel):
     chips: list[str]
     benefits: list[BenefitEntry]
     ingredients: list[str]
+    class SnapshotEntry(BaseModel):
+    day_offset: int
+    hydration: float | None
+    oiliness: float | None
+    texture: float | None
+    redness: float | None
+    pigmentation: float | None
+    blemish_index: float | None
+
+
+class MeaningfulChange(BaseModel):
+    metric: str
+    start: float
+    latest: float
+    delta: float
+    direction: str
+
+
+class ProgressResponse(BaseModel):
+    snapshots: list[SnapshotEntry]
+    meaningful_changes: list[MeaningfulChange]
