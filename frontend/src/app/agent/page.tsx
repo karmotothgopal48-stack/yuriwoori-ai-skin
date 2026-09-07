@@ -1,10 +1,10 @@
 "use client";
-
-import { useState } from "react";
+import { checkout } from "@/lib/api";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { buildAgentRoutine, ShoppingAgentResponse } from "@/lib/api";
 
-export default function AgentPage() {
+function AgentPageContent() {
   const searchParams = useSearchParams();
   const scanId = searchParams.get("scan_id") ?? undefined;
 
@@ -68,11 +68,29 @@ export default function AgentPage() {
               </span>
             ))}
           </div>
-          <button className="w-full bg-brand-primary text-white px-6 py-3 rounded-full hover:bg-brand-primary-light transition">
+          <button
+            onClick={async () => {
+              try {
+                const res = await checkout(result.cart_id);
+                window.location.href = res.checkout_url;
+              } catch {
+                alert("Couldn't start checkout ? some products may not be linked to Shopify yet.");
+              }
+            }}
+            className="w-full bg-brand-primary text-white px-6 py-3 rounded-full hover:bg-brand-primary-light transition"
+          >
             Add Complete Routine to Cart
           </button>
         </div>
       )}
     </main>
+  );
+}
+
+export default function AgentPage() {
+  return (
+    <Suspense fallback={null}>
+      <AgentPageContent />
+    </Suspense>
   );
 }

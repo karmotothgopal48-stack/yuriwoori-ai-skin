@@ -221,3 +221,20 @@ export function buildAgentRoutine(message: string, scanId?: string) {
     scan_id: scanId ?? null,
   });
 }
+
+export async function checkout(cartId: string) {
+  const response = await fetch(`${API_BASE_URL}/v1/checkout/${cartId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Checkout failed: ${response.status}`);
+  }
+
+  return response.json() as Promise<{
+    checkout_url: string;
+  }>;
+}

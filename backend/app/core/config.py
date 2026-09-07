@@ -1,7 +1,8 @@
 ﻿from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):
+class Settings(BaseSettings):
+
     anthropic_api_key: str = ""
     environment: str = "development"
     backend_port: int = 8000
@@ -9,6 +10,10 @@ class Settings(BaseSettings):
     jwt_secret: str = ""
     jwt_expires_in: int = 3600
     frontend_origin: str = "http://localhost:3000"
+
+    # Shopify Storefront API
+    shopify_store_domain: str = ""
+    shopify_storefront_access_token: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

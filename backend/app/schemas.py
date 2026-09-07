@@ -146,3 +146,6 @@ class ShoppingAgentResponse(BaseModel):
     total: float
     budget: float
     tags: list[str]
+    class CheckoutResponse(BaseModel):
+    checkout_url: str
+    unresolved_products: list[str]
