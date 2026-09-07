@@ -1,7 +1,7 @@
-"""
+﻿"""
 Imports the REAL YuriWoori catalogue from a Shopify product export CSV
 (data/products_export.csv). This is the authoritative source: real titles,
-prices, images, and — critically — real INCI ingredient lists straight from
+prices, images, and â€” critically â€” real INCI ingredient lists straight from
 your product admin. Nothing here is invented; unmapped/blank fields stay
 blank rather than being guessed.
 """
@@ -31,7 +31,7 @@ TAG_TO_STEP = {
 }
 
 # Keyword -> concern tag, scanned across title/benefits/chips text.
-# This CATEGORIZES the brand's own real marketing copy — it never invents claims.
+# This CATEGORIZES the brand's own real marketing copy â€” it never invents claims.
 CONCERN_KEYWORDS = {
     "hydrat": "hydration",
     "moistur": "hydration",
@@ -161,3 +161,4 @@ def import_csv():
 
 if __name__ == "__main__":
     import_csv()
+

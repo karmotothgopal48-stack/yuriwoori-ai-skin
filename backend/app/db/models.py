@@ -1,4 +1,4 @@
-from pgvector.sqlalchemy import Vector
+﻿from pgvector.sqlalchemy import Vector
 import uuid
 from datetime import datetime
 from sqlalchemy import String, Boolean, Float, Integer, DateTime, ForeignKey, ARRAY, Enum
@@ -112,6 +112,10 @@ class Product(Base):
     concern_tags: Mapped[list[str]] = mapped_column(
         ARRAY(String), nullable=False, server_default="{}"
     )
+    chips: Mapped[list[str]] = mapped_column(
+        ARRAY(String), nullable=False, server_default="{}"
+    )
+    benefits_raw: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class Ingredient(Base):
@@ -122,6 +126,7 @@ class Ingredient(Base):
     inci_name: Mapped[str | None] = mapped_column(String, nullable=True)
     function: Mapped[str | None] = mapped_column(String, nullable=True)
     concern_tags: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
+
 
 
 class ProductIngredient(Base):
@@ -243,3 +248,4 @@ class CoachMessage(Base):
     cited_product_ids: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
 
     conversation: Mapped["CoachConversation"] = relationship(back_populates="messages")
+

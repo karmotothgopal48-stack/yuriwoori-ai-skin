@@ -88,3 +88,23 @@ class CoachMessageResponse(BaseModel):
     product_b_name: str
     relationship_type: str
     explanation: str
+    class BenefitEntry(BaseModel):
+    icon: str
+    title: str
+    description: str
+
+
+class ProductDetailResponse(BaseModel):
+    id: uuid.UUID
+    name: str
+    price: float | None
+    currency: str
+    image_url: str | None
+    category: str | None
+    routine_step: str | None
+    description: str | None
+    product_url: str | None
+    concern_tags: list[str]
+    chips: list[str]
+    benefits: list[BenefitEntry]
+    ingredients: list[str]

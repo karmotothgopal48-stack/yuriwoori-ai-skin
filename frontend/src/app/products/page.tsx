@@ -1,5 +1,5 @@
-"use client";
-
+﻿"use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getProducts, ProductResponse } from "@/lib/api";
 
@@ -20,7 +20,7 @@ export default function ProductsPage() {
 
       <div className="grid grid-cols-2 gap-4">
         {products.map((p) => (
-          <div key={p.id} className="bg-white rounded-xl border border-border-soft overflow-hidden">
+          <Link key={p.id} href={`/products/${p.id}`} className="bg-white rounded-xl border border-border-soft overflow-hidden block">
             {p.image_url && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={p.image_url} alt={p.name} className="w-full h-32 object-cover" />
@@ -28,11 +28,12 @@ export default function ProductsPage() {
             <div className="p-3">
               <p className="text-sm font-medium leading-snug mb-1">{p.name}</p>
               <p className="text-xs text-brand-muted mb-1">{p.category}</p>
-              {p.price && <p className="text-sm font-semibold text-brand-primary">₹{p.price}</p>}
+              {p.price && <p className="text-sm font-semibold text-brand-primary">â‚¹{p.price}</p>}
             </div>
-          </div>
-        ))}
+          </Link>
+                ))}
       </div>
     </main>
   );
 }
+

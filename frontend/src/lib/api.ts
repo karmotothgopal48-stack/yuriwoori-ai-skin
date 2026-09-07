@@ -152,4 +152,28 @@ export function sendCoachMessage(message: string, conversationId?: string) {
 
 export function checkCompatibility(scanId: string) {
   return api.get<CompatibilityFlagResponse[]>(`/v1/scans/${scanId}/compatibility`);
+}export interface BenefitEntry {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface ProductDetailResponse {
+  id: string;
+  name: string;
+  price: number | null;
+  currency: string;
+  image_url: string | null;
+  category: string | null;
+  routine_step: string | null;
+  description: string | null;
+  product_url: string | null;
+  concern_tags: string[];
+  chips: string[];
+  benefits: BenefitEntry[];
+  ingredients: string[];
+}
+
+export function getProductDetail(productId: string) {
+  return api.get<ProductDetailResponse>(`/v1/products/${productId}`);
 }
