@@ -132,3 +132,15 @@ export interface RoutineResponse {
 export function getRoutine(scanId: string) {
   return api.get<RoutineResponse>(`/v1/scans/${scanId}/routine`);
 }
+export interface CoachMessageResponse {
+  conversation_id: string;
+  reply: string;
+  cited_product_ids: string[];
+}
+
+export function sendCoachMessage(message: string, conversationId?: string) {
+  return api.post<CoachMessageResponse>("/v1/coach/message", {
+    message,
+    conversation_id: conversationId ?? null,
+  });
+}

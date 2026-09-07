@@ -1,3 +1,4 @@
+from pgvector.sqlalchemy import Vector
 import uuid
 from datetime import datetime
 from sqlalchemy import String, Boolean, Float, Integer, DateTime, ForeignKey, ARRAY, Enum
@@ -90,11 +91,15 @@ class SkinPassport(Base):
     top_concerns: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
     overall_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     last_scanned_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    class Product(Base):
+class Product(Base):
     __tablename__ = "products"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    shopify_product_id: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    shopify_product_id: Mapped[str] = mapped_column(
+        String, unique=True, nullable=False
+    )
     name: Mapped[str] = mapped_column(String, nullable=False)
     price: Mapped[float | None] = mapped_column(Float, nullable=True)
     currency: Mapped[str] = mapped_column(String, default="INR")
@@ -104,6 +109,9 @@ class SkinPassport(Base):
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     product_url: Mapped[str | None] = mapped_column(String, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    concern_tags: Mapped[list[str]] = mapped_column(
+        ARRAY(String), nullable=False, server_default="{}"
+    )
 
 
 class Ingredient(Base):
@@ -137,7 +145,10 @@ class IngredientInteraction(Base):
     ingredient_a_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
     ingredient_b_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ingredients.id"))
     relationship_type: Mapped[IngredientInteractionType] = mapped_column(Enum(IngredientInteractionType))
-    explanation: Mapped[str | None] = mapped_column(String, nullable=True)class TimeOfDay(str, enum.Enum):
+    explanation: Mapped[str | None] = mapped_column(String, nullable=True)
+
+
+class TimeOfDay(str, enum.Enum):
     AM = "AM"
     PM = "PM"
 
@@ -166,3 +177,69 @@ class RoutineStep(Base):
 
     routine: Mapped["Routine"] = relationship(back_populates="steps")
     product: Mapped["Product"] = relationship()
+
+
+class Recommendation(Base):
+    __tablename__ = "recommendations"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
+    skin_profile_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("skin_profiles.id")
+    )
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("products.id")
+    )
+    rank: Mapped[int] = mapped_column(Integer)
+    match_reason: Mapped[str] = mapped_column(String)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
+
+
+class ProductEmbedding(Base):
+    __tablename__ = "product_embeddings"
+
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"), primary_key=True)
+    embedding: Mapped[list[float]] = mapped_column(Vector(384))
+    source_text: Mapped[str] = mapped_column(String)
+
+
+class IngredientEmbedding(Base):
+    __tablename__ = "ingredient_embeddings"
+
+    ingredient_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ingredients.id"), primary_key=True)
+    embedding: Mapped[list[float]] = mapped_column(Vector(384))
+    source_text: Mapped[str] = mapped_column(String)
+
+
+class CoachConversation(Base):
+    __tablename__ = "coach_conversations"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    messages: Mapped[list["CoachMessage"]] = relationship(back_populates="conversation")
+
+
+class CoachRole(str, enum.Enum):
+    user = "user"
+    assistant = "assistant"
+
+
+class CoachMessage(Base):
+    __tablename__ = "coach_messages"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    conversation_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("coach_conversations.id"))
+    role: Mapped[CoachRole] = mapped_column(Enum(CoachRole))
+    content: Mapped[str] = mapped_column(String)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    cited_product_ids: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
+
+    conversation: Mapped["CoachConversation"] = relationship(back_populates="messages")

@@ -74,3 +74,12 @@ class RecommendationResponse(BaseModel):
 class RoutineResponse(BaseModel):
     AM: list[RoutineStepResponse]
     PM: list[RoutineStepResponse]
+    class CoachMessageRequest(BaseModel):
+    conversation_id: uuid.UUID | None = None
+    message: str
+
+
+class CoachMessageResponse(BaseModel):
+    conversation_id: uuid.UUID
+    reply: str
+    cited_product_ids: list[str]

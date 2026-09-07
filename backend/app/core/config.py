@@ -1,7 +1,7 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+﻿from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):
+class Settings(BaseSettings):`r`n    anthropic_api_key: str = ""
     environment: str = "development"
     backend_port: int = 8000
     database_url: str = ""
