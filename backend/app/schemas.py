@@ -83,3 +83,8 @@ class CoachMessageResponse(BaseModel):
     conversation_id: uuid.UUID
     reply: str
     cited_product_ids: list[str]
+    class CompatibilityFlagResponse(BaseModel):
+    product_a_name: str
+    product_b_name: str
+    relationship_type: str
+    explanation: str

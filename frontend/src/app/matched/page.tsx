@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState , Suspense} from "react";
 import { useSearchParams } from "next/navigation";
 import { getRecommendations, RecommendationResponse } from "@/lib/api";
 
-export default function MatchedPage() {
+function MatchedPage() {
   const searchParams = useSearchParams();
   const scanId = searchParams.get("scan_id");
   const [recs, setRecs] = useState<RecommendationResponse[]>([]);
@@ -24,7 +24,7 @@ export default function MatchedPage() {
 
       {recs.length === 0 && (
         <p className="text-brand-muted text-sm">
-          No strong matches yet — your scan didn&apos;t show concerns our current catalogue targets directly.
+          No strong matches yet â€” your scan didn&apos;t show concerns our current catalogue targets directly.
         </p>
       )}
 
@@ -39,12 +39,19 @@ export default function MatchedPage() {
             )}
             <div className="flex-1">
               <p className="text-sm font-medium leading-snug mb-0.5">{r.name}</p>
-              {r.price && <p className="text-sm font-semibold text-brand-primary mb-1">₹{r.price}</p>}
+              {r.price && <p className="text-sm font-semibold text-brand-primary mb-1">â‚¹{r.price}</p>}
               <p className="text-xs text-brand-muted">{r.match_reason}</p>
             </div>
           </div>
         ))}
       </div>
     </main>
+  );
+}
+export default function MatchedPageWithSuspense() {
+  return (
+    <Suspense fallback={null}>
+      <MatchedPage />
+    </Suspense>
   );
 }

@@ -1,3 +1,5 @@
+from app.services.ingredient_compatibility import check_routine_compatibility
+from app.schemas import CompatibilityFlagResponse
 from app.db.models import Routine, RoutineStep, TimeOfDay
 from app.services.routine_builder import build_routine
 from app.schemas import RoutineResponse, RoutineStepResponse
@@ -255,3 +257,29 @@ def get_routine(scan_id: uuid.UUID, db: Session = Depends(get_db)):
         ]
 
     return RoutineResponse(AM=to_response_new(built["AM"]), PM=to_response_new(built["PM"]))
+@router.get("/{scan_id}/compatibility", response_model=list[CompatibilityFlagResponse])
+def check_compatibility(scan_id: uuid.UUID, db: Session = Depends(get_db)):
+    profile = db.query(SkinProfile).filter(SkinProfile.scan_id == scan_id).first()
+    if not profile:
+        raise HTTPException(status_code=400, detail="Scan has no analyzed profile yet")
+
+    routine = db.query(Routine).filter(Routine.skin_profile_id == profile.id).first()
+    if not routine:
+        raise HTTPException(status_code=400, detail="No routine built yet for this scan")
+
+    product_ids = list({s.product_id for s in routine.steps})
+    flags = check_routine_compatibility(db, product_ids)
+
+    result = []
+    for f in flags:
+        product_a = db.get(Product, f["product_id_a"])
+        product_b = db.get(Product, f["product_id_b"])
+        result.append(
+            CompatibilityFlagResponse(
+                product_a_name=product_a.name,
+                product_b_name=product_b.name,
+                relationship_type=f["relationship_type"],
+                explanation=f["explanation"],
+            )
+        )
+    return result

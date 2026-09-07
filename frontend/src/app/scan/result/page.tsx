@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -19,7 +19,7 @@ function ResultContent() {
   }, [scanId]);
 
   if (error) return <main className="min-h-screen flex items-center justify-center px-8 text-center">{error}</main>;
-  if (!profile) return <main className="min-h-screen flex items-center justify-center text-brand-muted">Loading…</main>;
+  if (!profile) return <main className="min-h-screen flex items-center justify-center text-brand-muted">Loadingâ€¦</main>;
 
   const scores = [
     { label: "Hydration", val: profile.hydration ?? 0 },
@@ -61,21 +61,25 @@ function ResultContent() {
         >
           Save to My Skin Passport
         </Link>
-      </div>
-    </main>
-  );
-}
-<Link
+
+        <Link
           href={`/matched?scan_id=${scanId}`}
           className="block text-center mt-3 border border-border-soft text-brand-text px-6 py-3 rounded-full hover:bg-bg-cream-alt transition"
         >
           See Matched Products
-        </Link><Link
+        </Link>
+
+        <Link
           href={`/routine?scan_id=${scanId}`}
           className="block text-center mt-3 border border-border-soft text-brand-text px-6 py-3 rounded-full hover:bg-bg-cream-alt transition"
         >
           Build My Routine
         </Link>
+      </div>
+    </main>
+  );
+}
+
 export default function ResultPage() {
   // useSearchParams() requires a Suspense boundary around the component that
   // calls it, or `next build` fails to prerender this route.
@@ -85,3 +89,5 @@ export default function ResultPage() {
     </Suspense>
   );
 }
+
+

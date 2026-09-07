@@ -143,4 +143,13 @@ export function sendCoachMessage(message: string, conversationId?: string) {
     message,
     conversation_id: conversationId ?? null,
   });
+}export interface CompatibilityFlagResponse {
+  product_a_name: string;
+  product_b_name: string;
+  relationship_type: string;
+  explanation: string;
+}
+
+export function checkCompatibility(scanId: string) {
+  return api.get<CompatibilityFlagResponse[]>(`/v1/scans/${scanId}/compatibility`);
 }
