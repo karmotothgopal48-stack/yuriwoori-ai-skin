@@ -1,0 +1,23 @@
+# Dependencies / environments
+node_modules/
+venv/
+.venv/
+
+# Build output and caches
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Secrets and local config
+.env
+.env.local
+
+# Saved scan photos (personal images)
+backend/app/uploads/
+backend/uploads/
+
+# Editor / tool local state
+.claude/
+.vscode/
+.DS_Store
