@@ -126,7 +126,7 @@ Settings are read from `.env` (see `app/core/config.py`). Never commit `.env`.
 |---|---|---|
 | `DATABASE_URL` | Yes | e.g. `postgresql://user:pass@localhost:5432/yuriwoori_db`. Without it the app still boots (`/v1/health`, `/docs`) but every DB route fails. |
 | `FRONTEND_ORIGIN` | Yes | Comma-separated browser origins allowed by CORS. Default: `http://localhost:2999,http://127.0.0.1:2999,http://localhost:3000`. |
-| `ANTHROPIC_API_KEY` | For chat | Powers `/v1/coach/message`. Missing key → `503`; billing/API failure → `502`. |
+| `ANTHROPIC_API_KEY` | For chat | Powers `/v1/coach/message`. Missing key → `503`; out of credits → `503` with a "console.anthropic.com" hint; other API failure → `502` with Anthropic's own message. |
 | `SHOPIFY_STORE_DOMAIN` | For checkout | Store domain, e.g. `your-store.myshopify.com`. |
 | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | For checkout | Storefront API token. |
 | `JWT_SECRET` | No | Reserved for future auth (unused). |
@@ -305,7 +305,8 @@ origin in `FRONTEND_ORIGIN`; the default already allows `http://localhost:2999`.
 | `Invalid HTTP request received` in the log, `ERR_SSL_PROTOCOL_ERROR` in the browser | The client used `https://`. The server is HTTP only — use `http://localhost:8000/v1`. |
 | `503 Database is unavailable` | Postgres isn't running or `DATABASE_URL` is wrong. |
 | `503 AI assistant is not configured` | `ANTHROPIC_API_KEY` missing in `.env`. |
-| `502 The AI assistant service failed…` | Anthropic rejected the request; check the server log (e.g. "credit balance is too low"). |
+| `503 …run out of API credits` | The Anthropic account's credit balance is too low. Add credits at console.anthropic.com — this is a billing action, not a code fix. |
+| `502 The AI assistant service failed: …` | Anthropic rejected the request for another reason; the message is Anthropic's own (e.g. an invalid model, rate limit). |
 | `503 Skin analysis engine is unavailable` | OpenCV failed to import (e.g. blocked DLL); the app must run from the project `venv`. |
 | `/catalogue/recommendations` returns an empty list | No metric crossed a threshold (see `active_concerns` in the response). Not an error. |
 | Routine / DB recommendations are empty | Stored `concern_tags` are empty from an older import. Re-run `python scripts/import_catalogue_csv.py`. |

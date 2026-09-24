@@ -186,7 +186,7 @@ Typography: **DM Serif Display** for headings, **Montserrat** for body (loaded f
 | CORS error in the console | Add this app's origin to the backend's `FRONTEND_ORIGIN` and restart the backend. |
 | "This photo didn't pass the quality check" | Retake in soft, even light; very dark, bright or blurry photos fail the gate. |
 | A 500 from `/analyze` | Backend problem — check the backend terminal. Make sure it was restarted after code changes. |
-| Chat replies "Sorry, I couldn't answer that…" | Backend coach failure, commonly a missing or unfunded `ANTHROPIC_API_KEY`. |
+| Chat replies "Sorry, I couldn't answer that…" | Backend coach failure. The message now includes the specific reason from the backend, e.g. missing `ANTHROPIC_API_KEY` or the Anthropic account being out of credits. |
 | Products / Routine say nothing was found | The scan didn't exceed any concern threshold, so the backend recommended nothing. Not an error. |
 | Camera doesn't start | Allow camera access in the browser, or use "Upload a photo instead". |
 | Changed `.env` but nothing happened | Restart the dev server; rebuild if using `preview`. |

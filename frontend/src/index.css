@@ -1,35 +1,108 @@
 @import "tailwindcss";
 
-/* YuriWoori Brand Book v1.2 — §5 colour palette, §4 typography.
-   Mirrored in src/theme/brand.js for SVG/inline use. */
 @theme {
-  --color-jade: #005c5d;
-  --color-jade-soft: #9dd4ca;
-  --color-jade-line: #bddccd;
-  --color-mist: #e3eceb;
-  --color-sage: #528778;
-  --color-sage-light: #c6d6c9;
-  --color-cream: #f1f5eb;
-  --color-aqua: #d5eee7;
-  --color-ink: #1c2b2a;
-  --color-ink-soft: #55676a;
+  /* Colors */
+  --color-jade: #005c5d; /* Primary deep green */
+  --color-jade-soft: #9dd4ca; /* 40% tint */
+  --color-jade-line: #bddccd; /* 20% tint */
+  --color-mist: #e3eceb; /* 10% tint */
+  --color-sage: #528778; 
+  --color-sage-light: #c6d6c9; 
+  --color-cream: #f1f5eb; /* Warm ivory / soft cream background */
+  --color-white: #ffffff; /* Surface white */
+  --color-ink: #1c2b2a; /* Deep green-charcoal text */
+  --color-ink-soft: #55676a; /* Muted sage-gray secondary text */
+  --color-blush: #f4e9e4; /* Restrained accent */
+  --color-success: #a3b899; /* Soft success green */
+  --color-caution: #e3c18b; /* Soft amber */
+  --color-error: #cca7a2; /* Muted rose */
+
+  /* Typography */
   --font-display: "DM Serif Display", "Times New Roman", serif;
   --font-sans: "Montserrat", system-ui, sans-serif;
+
+  /* Fluid Type Scale */
+  --text-xs: clamp(0.75rem, 0.71rem + 0.17vw, 0.85rem);
+  --text-sm: clamp(0.875rem, 0.83rem + 0.17vw, 0.95rem);
+  --text-base: clamp(1rem, 0.95rem + 0.22vw, 1.1rem);
+  --text-lg: clamp(1.125rem, 1.05rem + 0.33vw, 1.3rem);
+  --text-xl: clamp(1.25rem, 1.15rem + 0.44vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.35rem + 0.67vw, 1.8rem);
+  --text-3xl: clamp(1.875rem, 1.6rem + 1.22vw, 2.4rem);
+  --text-4xl: clamp(2.25rem, 1.85rem + 1.78vw, 3rem);
+
+  /* Shadows (green-tinted) */
+  --shadow-soft: 0 4px 20px -2px rgba(0, 92, 93, 0.05), 0 2px 8px -2px rgba(0, 92, 93, 0.03);
+  --shadow-float: 0 12px 30px -4px rgba(0, 92, 93, 0.08), 0 4px 10px -2px rgba(0, 92, 93, 0.04);
+  --shadow-bloom: 0 0 40px rgba(0, 92, 93, 0.1);
+
+  /* Border Radius */
+  --radius-card: 24px;
+  --radius-hero: 32px;
+  --radius-pill: 999px;
 }
 
-html, body, #root { min-height: 100%; }
+html, body, #root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 body {
   margin: 0;
-  background: #fff;
+  background: var(--color-cream);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
-h1, h2, h3, .font-display { font-family: var(--font-display); font-weight: 400; }
 
-@keyframes yw-scan { 0%, 100% { top: 12%; opacity: 0 } 15%, 85% { opacity: .9 } 50% { top: 86% } }
-@keyframes yw-fade-up { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
-.yw-enter { animation: yw-fade-up .45s ease both; }
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.eyebrow {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: var(--text-xs);
+  color: var(--color-sage);
+  font-weight: 500;
+}
+
+/* Hairline border utility */
+.border-hairline {
+  border: 1px solid var(--color-sage-light);
+}
+
+/* Subtle noise overlay (optional) */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* Animations */
+@keyframes yw-scan {
+  0%, 100% { top: 5%; opacity: 0; }
+  15%, 85% { opacity: 1; }
+  50% { top: 95%; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 92, 93, 0.2); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 92, 93, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 92, 93, 0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .yw-enter, * { animation: none !important; transition: none !important; }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

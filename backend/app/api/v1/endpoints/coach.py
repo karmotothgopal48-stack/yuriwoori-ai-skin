@@ -1,6 +1,6 @@
 import logging
 import uuid
-from anthropic import APIError
+from anthropic import APIError, APIStatusError
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -35,6 +35,15 @@ def send_message(payload: CoachMessageRequest, db: Session = Depends(get_db)):
 
     try:
         reply_text, cited_ids = ask_yuri(db, history, payload.message)
+    except APIStatusError as exc:
+        logger.error("Anthropic API error (%s): %s", exc.status_code, exc.message)
+        if "credit balance is too low" in exc.message:
+            raise HTTPException(
+                status_code=503,
+                detail="AI assistant is unavailable: the Anthropic account has run out of API credits. "
+                "Add credits at console.anthropic.com and try again.",
+            )
+        raise HTTPException(status_code=502, detail=f"The AI assistant service failed to respond: {exc.message}")
     except APIError as exc:
         logger.error("Anthropic API error: %s", exc)
         raise HTTPException(status_code=502, detail="The AI assistant service failed to respond. Please try again.")
