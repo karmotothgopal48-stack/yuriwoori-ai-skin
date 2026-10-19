@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AlertCircle, RotateCcw, RefreshCcw, CircleCheck, Loader2, CircleDashed } from "lucide-react";
 import { Button, Eyebrow } from "../components/Button";
 import { analyzeSkin } from "../services/skinAnalysis";
+import { createReportPhoto } from "../services/reportPhoto";
 import { motion } from "framer-motion";
 
 // These are the real backend steps, advanced by analyzeSkin()'s onStage callback.
@@ -84,7 +85,7 @@ function AnalysisVisual({ photo, running }) {
   );
 }
 
-export default function Processing({ go, photo, setPhoto, bodyPart, setAnalysis, signOut }) {
+export default function Processing({ go, photo, setPhoto, bodyPart, setAnalysis, setReportPhoto, signOut }) {
   const [stage, setStage] = useState("upload");
   const [error, setError] = useState(null);
   const [attempt, setAttempt] = useState(0);
@@ -98,8 +99,10 @@ export default function Processing({ go, photo, setPhoto, bodyPart, setAnalysis,
     analyzeSkin(photo, setStage, bodyPart)
       .then((res) => {
         setAnalysis(res);
-        // "Your photo is not stored and is deleted after analysis": the browser lets go of it too once it's done
-        // (the server never kept it). After a failed analysis it stays in memory only, for "Try again".
+        // The server never kept the photo. For this scan's report it stays in this tab's memory only (an object URL
+        // bound to res.scanId, released on a new scan, home or sign-out); the capture itself is let go of here.
+        // After a failed analysis it stays in memory only, for "Try again".
+        setReportPhoto?.(createReportPhoto(photo, res.scanId));
         setTimeout(() => { go("profile"); setPhoto?.(null); }, 900); // let the last tick render
       })
       .catch((e) => {

@@ -19,6 +19,7 @@ import Report from "./screens/Report";
 import { fetchMe } from "./services/skinAnalysis";
 import { getUserToken, setUserToken } from "./services/session";
 import { sessionRejected } from "./services/apiErrors";
+import { releaseReportPhoto, reportPhotoFor } from "./services/reportPhoto";
 
 // Numbered steps shown in the header. Start and the Ask Yuri chat sit outside the flow. The routine is the
 // only place products are recommended (morning + evening, each with Add to cart); there is no separate
@@ -54,6 +55,10 @@ function SkinAnalysisApp() {
   // Body part in the photo ("face" | "hand"), detected on the camera step; picks the analysis flow
   const [bodyPart, setBodyPart] = useState("face");
   const [analysis, setAnalysis] = useState(null);
+  // The selfie shown on this scan's report: an in-memory object URL bound to its scan, never stored (services/reportPhoto.js).
+  // Revoked whenever it is replaced or cleared, and when the app unmounts.
+  const [reportPhoto, setReportPhoto] = useState(null);
+  useEffect(() => () => releaseReportPhoto(reportPhoto), [reportPhoto]);
   // Step 1 answers ({ gender, age }); frontend-only until the flow needs them
   const [about, setAbout] = useState(null);
   // undefined = still checking a saved session, null = not signed up, object = signed-up user
@@ -88,7 +93,10 @@ function SkinAnalysisApp() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  const signOut = useCallback(() => { setUserToken(null); setUser(null); setAnalysis(null); setPhoto(null); go("start"); }, [go]);
+  const signOut = useCallback(() => { setUserToken(null); setUser(null); setAnalysis(null); setPhoto(null); setReportPhoto(null); go("start"); }, [go]);
+
+  // Leaving the report (home, or a new scan starting) lets go of its photo
+  useEffect(() => { if (["start", "about", "camera"].includes(screen)) setReportPhoto(null); }, [screen]);
 
   const Screen = SCREENS[screen];
   const isStart = screen === "start";
@@ -97,7 +105,7 @@ function SkinAnalysisApp() {
     if (NEEDS_ANALYSIS.includes(screen) && !analysis) return <Start go={go} user={user} signOut={signOut} serverUnreachable={serverUnreachable} />;
     // a session from before WhatsApp was asked for counts as missing details: the form asks once more
     if (NEEDS_SIGNUP.includes(screen) && (!user || !user.whatsapp)) return <Signup setUser={setUser} />;
-    return <Screen go={go} serverUnreachable={serverUnreachable} about={about} setAbout={setAbout} photo={photo} setPhoto={setPhoto} bodyPart={bodyPart} setBodyPart={setBodyPart} analysis={analysis} setAnalysis={setAnalysis} user={user} setUser={setUser} signOut={signOut} />;
+    return <Screen go={go} serverUnreachable={serverUnreachable} about={about} setAbout={setAbout} photo={photo} setPhoto={setPhoto} bodyPart={bodyPart} setBodyPart={setBodyPart} analysis={analysis} setAnalysis={setAnalysis} setReportPhoto={setReportPhoto} reportPhotoUrl={reportPhotoFor(reportPhoto, analysis)} user={user} setUser={setUser} signOut={signOut} />;
   };
 
   return (

@@ -80,7 +80,7 @@ function SkinProfileHero({ photo, profile, count, hand }) {
         <div className="relative aspect-[4/5] overflow-hidden rounded-t-[999px] rounded-b-[2rem] bg-mist shadow-float">
           {photo
             ? <img src={photo} alt="Your photo used for this analysis" className="h-full w-full object-cover -scale-x-100" />
-            : <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-ink-soft"><Ripple className="h-20 w-20" />Photo deleted after analysis</div>}
+            : <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center text-sm text-ink-soft"><Ripple className="h-20 w-20" />Your photo is no longer available. It was shown only on this device during your session and is never stored.</div>}
           <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#004647]/35 to-transparent" />
           <figcaption className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/90 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-jade shadow-soft backdrop-blur">
             YuriWoori scan · {count} characteristics
@@ -227,7 +227,8 @@ function RoutineCTA({ go }) {
   );
 }
 
-export default function Profile({ go, photo, analysis }) {
+// reportPhotoUrl: this scan's selfie, from browser memory only (App.jsx / services/reportPhoto.js); null once released
+export default function Profile({ go, reportPhotoUrl, analysis }) {
   const { concerns = [], profile, activeConcerns } = analysis ?? {};
   if (!profile) return null;
   const hand = analysis?.bodyPart === "hand"; // hand scans measure 4 characteristics (no pores, blemishes or oil)
@@ -237,7 +238,7 @@ export default function Profile({ go, photo, analysis }) {
 
   return (
     <div className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
-      <SkinProfileHero photo={photo} profile={profile} count={metrics.length} hand={hand} />
+      <SkinProfileHero photo={reportPhotoUrl} profile={profile} count={metrics.length} hand={hand} />
       <SkinSummary profile={profile} activeConcerns={activeConcerns} flagged={metrics.filter((c) => c.flagged)} />
       <MeasurementComparison metrics={metrics} hasBenchmark={hasBenchmark} countWord={countWord} />
       <RoutineCTA go={go} />
