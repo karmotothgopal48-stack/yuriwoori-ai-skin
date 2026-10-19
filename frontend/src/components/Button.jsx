@@ -30,7 +30,10 @@ export function Button({
       className={`${baseClasses} ${VARIANTS[variant]} ${full && !isTertiary ? "w-full" : ""} ${className}`}
     >
       {loading ? (
-        <Loader2 className="animate-spin" size={18} />
+        <>
+          <Loader2 className="animate-spin" size={18} aria-hidden="true" />
+          <span className="sr-only">{children}</span>
+        </>
       ) : (
         <>
           {IconLeft && <IconLeft size={18} strokeWidth={1.5} />}

@@ -1,15 +1,13 @@
 """
 Budget-constrained routine builder. Given a real budget and (optionally) a
-real skin profile, greedily selects the highest-matching real product per
-routine step that still fits the remaining budget. Every price and product
-is real — nothing here is estimated or invented.
+real skin profile, greedily selects the highest-matching product of the live
+store catalogue per routine step that still fits the remaining budget. Every
+price and product is the store's current one — nothing is estimated or invented.
 """
 
 import re
-from sqlalchemy.orm import Session
 
-from app.db.models import Product
-from app.services.recommendation import build_recommendations
+from app.services.recommendation import build_recommendations, is_selectable
 
 STEP_PRIORITY = ["cleanse", "tone", "treat", "moisturize", "protect"]
 
@@ -31,19 +29,21 @@ def extract_budget(message: str) -> float | None:
     return None
 
 
-def build_budget_routine(db: Session, budget: float, profile=None) -> dict:
+def build_budget_routine(products, budget: float, profile=None) -> dict:
+    """`products`: the live catalogue's products."""
     if profile is not None:
-        scored = build_recommendations(db, profile, limit_per_step=10)
+        scored = build_recommendations(profile, products, limit_per_step=10)
         candidates_by_step: dict[str, list[dict]] = {}
         for item in scored:
             step = item["product"].routine_step
             candidates_by_step.setdefault(step, []).append(item)
     else:
-        # No scan context: fall back to all active products, grouped by step,
+        # No scan context: every product that can be bought now, grouped by step,
         # with no concern-based ranking (just cheapest-first per step).
         candidates_by_step = {}
-        for p in db.query(Product).filter(Product.active == True).all():  # noqa: E712
-            candidates_by_step.setdefault(p.routine_step, []).append({"product": p, "score": 0})
+        for p in products:
+            if is_selectable(p):
+                candidates_by_step.setdefault(p.routine_step, []).append({"product": p, "score": 0})
 
     remaining = budget
     picks = []

@@ -31,24 +31,30 @@ Analysis, recommendations, routine and chat are served by the FastAPI backend (s
 Navigation is a simple state machine in `src/App.jsx` (no router). The header shows step progress through `FLOW`:
 
 ```
-start → permission → tips → camera → review → processing → results
-      → profile → recommendations → products → routine → assistant
+start → signup → permission → tips → camera → review → processing
+      → profile → concerns → routine → products → (official yuriwoori.com product page)
+assistant (Ask Yuri) is reachable from Start, Routine and Products, outside the numbered steps
+/admin  → protected admin dashboard (separate app: login, metrics, analyses table, Export Excel)
 ```
+
+Signup (name + email + required privacy-notice consent) must happen before any camera step; a saved session is
+checked with `GET /users/me` on load. Only the session token is kept in the browser (`localStorage`); the admin
+token lives in `sessionStorage` and ends with the tab. Opening a product page from a routine step also sends a
+best-effort `product_clicked` event, and reaching the Routine screen sends `recommendations_shown`; tracking never
+blocks the link. `/admin` needs the static host to serve `index.html` for that path (Vite dev does).
 
 | Screen | What it does |
 |---|---|
-| `Start` | Landing page; begin the analysis or open the assistant. |
-| `Permission` | Explains camera use; request access or upload a photo instead. |
-| `Tips` | Lighting and framing guidance. |
-| `Camera` | Live camera with lighting check, countdown auto-capture, manual capture, upload fallback. |
-| `Review` | Confirm or retake the photo. |
-| `Processing` | Sends the photo to the backend; animated stages; error state with Retake / Try again. |
-| `Results` | Per-area score cards with a status (strength / balanced / focus). |
-| `Profile` | Skin type, overall score, focus areas and strengths. |
-| `Recommendations` | Guidance for each focus area, with the matching products from the catalogue API underneath (each product shown once, under the first area it helps). |
-| `Products` | The full list of products matched by the backend to the scan. |
-| `Routine` | Morning and evening steps, plus ingredient-compatibility warnings. |
-| `Assistant` | Chat with Yuri AI (Claude via the backend). |
+| `Start` | Landing page; begin the analysis or open Ask Yuri. |
+| `Permission` | Explains camera use and that the photo is saved on the server with the scan. |
+| `Tips` | Guidance that maps to the real checks: even light, one centred face, fill the oval, no glare, hold still. |
+| `Camera` | Live camera with on-device face/hand detection and full-face checks (MediaPipe), a lighting check, capture enabled only for a usable face or a hand, and "Upload a photo instead". The server repeats the checks after capture. |
+| `Review` | Confirm or retake; explains which checks the server runs next. |
+| `Processing` | Real progress through the four backend steps (upload → quality check → face + skin analysis → product matching). Error states per cause: quality check failed or no centred face → Retake; server unreachable → Try again. |
+| `Profile` | Skin type, overall score, a one-line summary, the seven measurements next to the YuriWoori typical benchmark (each with "What was measured"), key insights, the photo quality check and how it was analysed. |
+| `Routine` | The only place products are recommended: morning and evening steps, plus optional extras (e.g. masks). Each product card shows live details from yuriwoori.com (`GET /catalogue/live`: image, price, original price, discount, availability) with Add to cart / quantity, official "How to use" text, the backend's reason and a product link; ingredient interaction notes follow. |
+| Cart (header + drawer) | One cart for the app (`services/cart.jsx`, kept in this browser): items merge by Shopify variant, quantity +/−, remove, subtotal, and "Proceed to checkout", which opens yuriwoori.com's own Shopify cart. |
+| `Assistant` | Chat with Yuri AI (Claude via the backend). Backend errors are shown as-is. |
 
 Screens after `Processing` need an analysis result; without one, `App` sends the user back to `Start`.
 
@@ -57,14 +63,14 @@ Screens after `Processing` need an analysis result; without one, `App` sends the
 | Feature | Backend endpoint | Notes |
 |---|---|---|
 | Skin analysis | `POST /scans`, `/scans/{id}/frames`, `/scans/{id}/analyze` | Photo is re-encoded to JPEG and uploaded. |
-| Product recommendations | `GET /catalogue/recommendations?scan_id={id}` | Served from the backend's `data/products_export.csv`; includes image, price, step, store link and a match reason. |
-| Routine | `GET /scans/{id}/routine` | AM and PM steps with reasons; joined with `GET /products` for step and price. |
-| Compatibility warnings | `GET /scans/{id}/compatibility` | Shown when conflicts exist. |
+| Product recommendations | `GET /catalogue/recommendations?scan_id={id}` | Served from the backend's `data/products_export.csv`; includes image, price, step, store link, `matched_concerns`, `active_concerns`, key benefit and how-to-use text. |
+| Routine | `GET /scans/{id}/routine` | AM and PM steps with reasons; joined with `GET /products` (step, price, URL) and `GET /catalogue/products` (official how-to-use text, matched by product handle). |
+| Ingredient notes | `GET /scans/{id}/compatibility` | Shown when interactions exist (synergistic / caution / avoid in the same routine). |
 | Yuri AI chat | `POST /coach/message` | Conversation id is kept for follow-up messages. |
 
-Still static on the frontend: the camera's face-lock indicator (simulated — the backend has no face-detection
-endpoint), the guidance text on the Recommendations screen (`FOCUS_GUIDANCE`), the suggested chat questions, and the
-processing-stage labels.
+Still static on the frontend: the "what was measured" descriptions and concern guidance (`METRIC_INFO`,
+`FOCUS_GUIDANCE` in `data/mock.js`), the suggested chat questions, and the processing-stage labels (their progress
+is driven by the real API calls).
 
 ## Project structure
 
@@ -80,7 +86,7 @@ frontend/
     ├── main.jsx               React root
     ├── App.jsx                Screen state machine and shared state
     ├── index.css              Tailwind import + brand theme tokens
-    ├── components/            Button, Header, Logo, ProductCard, ScoreRing
+    ├── components/            Button, Header, Logo, MetricBar, ProductCard, ScoreRing
     ├── screens/               One file per step of the journey
     ├── services/
     │   ├── api.js             fetch wrapper, ApiError, API_URL
@@ -88,7 +94,7 @@ frontend/
     │   └── camera.js          Capture, upload and brightness helpers
     ├── data/
     │   ├── mock.js            Static copy (focus guidance, stages, suggested questions)
-    │   └── catalogue.js       Legacy product snapshot; only SITE_URL is still used
+    │   (no product data in the frontend: every product comes from the backend API / official catalogue)
     └── theme/brand.js         Brand colour and logo constants
 ```
 
@@ -133,31 +139,32 @@ Screens never call `fetch` directly. They use two files:
   with a readable message. It handles FastAPI's `detail` (string or validation list) and a friendly message when the
   server is unreachable.
 - **`src/services/skinAnalysis.js`** — the only place that knows the backend's shapes:
-  - `analyzeSkin(photo)` runs the full scan flow and returns `{ scanId, concerns, profile, recommendations, routine, compatibility }`.
-    Recommendations, routine and products are fetched best-effort, so a failure there doesn't discard a successful analysis.
+  - `analyzeSkin(photo, onStage)` runs the full scan flow, reports real progress through `onStage`
+    (`upload` → `quality` → `analyze` → `match` → `done`), and returns
+    `{ scanId, quality, profile, concerns, activeConcerns, catalogueCount, recommendations, routine, compatibility }`.
+    Recommendations, routine and product lists are fetched best-effort, so a failure there doesn't discard a successful analysis.
+    Errors carry a `kind` (`quality`, `face`, `photo`, `network`, `server`) so Processing can show the right advice.
   - `askYuri(message)` posts to the coach and remembers the conversation id.
-  - `detectFace()` is a simulated placeholder.
-
-A photo that fails the backend's quality check surfaces as an error on the Processing screen with a hint to retake it.
 
 ## Data mapping
 
-The backend returns raw metrics; `buildAnalysis()` in `skinAnalysis.js` turns them into the seven result cards.
-Metrics where a higher number means *more of the trait* are flipped so every card is a health score (higher = better).
+The backend returns seven 0–100 values. They are shown **exactly as returned** (not inverted or re-scaled), with the
+direction stated on each: hydration and texture are "higher is better"; the rest are "higher means more of this trait".
 
-| Card | Backend field | Direction |
+| Label | Backend field | Concern tags used by the recommender |
 |---|---|---|
-| Hydration | `hydration` | as is |
-| Oil balance | `oiliness` | `100 − value` |
-| Texture | `texture` | as is |
-| Redness | `redness` | `100 − value` |
-| Pigmentation | `pigmentation` | `100 − value` |
-| Pores | `pore_visibility` | `100 − value` |
-| Blemishes | `blemish_index` | `100 − value` |
+| Hydration | `hydration` | `hydration` |
+| Oiliness | `oiliness` | `oiliness` |
+| Texture | `texture` | none — measured only, never used to pick products |
+| Redness | `redness` | `redness` |
+| Uneven tone | `pigmentation` | `brightening`, `uneven-tone` |
+| Pore visibility | `pore_visibility` | `pore-visibility` |
+| Blemishes | `blemish_index` | `blemish` |
 
-Status per card: **strength** at score ≥ 75; **focus** for the three lowest scores; otherwise **balanced**. The
-"overall" score shown on the Profile is the backend's `overall_score`. Face-marker positions, dark circles and fine
-lines are not shown because the backend does not measure them.
+A measurement is shown as **"Stood out"** only when the backend lists one of its tags in `active_concerns` (it crossed
+the backend's own threshold); the frontend never re-derives thresholds. The overall score is the backend's
+`overall_score`. Confidence scores, face markers, dark circles, fine lines and sensitivity are not shown because the
+backend does not measure them.
 
 ## Design system
 
@@ -193,8 +200,12 @@ Typography: **DM Serif Display** for headings, **Montserrat** for body (loaded f
 
 ## Known limitations
 
-- Results are a cosmetic, heuristic reading of visible skin, not a medical diagnosis.
-- The camera's "Face detected" pill is a UI simulation; only the lighting check is measured.
+- Results are a cosmetic, rule-based image reading of visible skin (OpenCV, `heuristic-cv-v0`), not a trained AI
+  model and not a medical diagnosis.
+- The camera only checks lighting on the device; the face is found by the server after capture.
+- There is no pre-scan questionnaire: the backend has no endpoint that accepts self-reported skin type or concerns.
+- Stock/availability is not shown: the CSV export is a one-time snapshot, not live inventory.
+- Usage text is the product's own "How to Use" copy; no frequency is added beyond what that text says.
 - Yuri AI depends on the backend's Anthropic access and answers only from the product catalogue.
 - No authentication or saved history in the UI yet (the backend supports passport and progress endpoints that the
   frontend does not use).

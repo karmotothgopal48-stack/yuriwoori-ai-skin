@@ -47,5 +47,5 @@ Open <http://localhost:2999> and run a scan. The API docs are at <http://localho
 ## Notes
 
 - `.env` files hold local secrets and are git-ignored; copy from each folder's `.env.example`.
-- Saved scan photos (`backend/app/uploads/`) are personal images and are git-ignored.
+- Scan photos are never stored. `backend/app/uploads/` may still hold photos from older scans (git-ignored); remove them with `backend/scripts/purge_legacy_selfies.py --apply`.
 - `backend/src/app/passport/page.tsx` is a leftover Next.js file that the backend does not use.

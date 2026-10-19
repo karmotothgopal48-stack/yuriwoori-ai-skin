@@ -1,129 +1,161 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertCircle, RotateCcw, RefreshCcw } from "lucide-react";
-import { Button } from "../components/Button";
+import { AlertCircle, RotateCcw, RefreshCcw, CircleCheck, Loader2, CircleDashed } from "lucide-react";
+import { Button, Eyebrow } from "../components/Button";
 import { analyzeSkin } from "../services/skinAnalysis";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
-const STATUS_TEXTS = [
-  "Analyzing your skin...",
-  "Checking skin characteristics...",
-  "Preparing your personalized insights..."
+// These are the real backend steps, advanced by analyzeSkin()'s onStage callback.
+const STAGES = [
+  { key: "upload", label: "Uploading your photo" },
+  { key: "quality", label: "Photo quality check" },
+  { key: "analyze", label: "Finding your face and measuring skin", handLabel: "Finding your hand and measuring skin" },
+  { key: "match", label: "Matching YuriWoori products" },
+];
+const ORDER = [...STAGES.map((s) => s.key), "done"];
+
+// Advice per error kind (see scanError() in services/skinAnalysis.js).
+const ERROR_HELP = {
+  quality: { title: "Photo quality check failed", retake: true },
+  face: { title: "We couldn't use this photo of your face", retake: true },
+  hand: { title: "We couldn't find your hand", retake: true },
+  photo: { title: "That photo couldn't be read", retake: true },
+  network: { title: "Can't reach the YuriWoori server", retake: false },
+  rate: { title: "The server is busy", retake: false },
+  server: { title: "Analysis failed", retake: false },
+  auth: { title: "Please enter your details again", retake: false, signup: true },
+};
+
+function StageRow({ stage, state }) {
+  const Icon = state === "done" ? CircleCheck : state === "active" ? Loader2 : state === "failed" ? AlertCircle : CircleDashed;
+  const tone = state === "done" ? "text-jade" : state === "active" ? "text-jade" : state === "failed" ? "text-[#8a2e2e]" : "text-ink-soft/40";
+  return (
+    <li className="flex items-start gap-3 text-left">
+      <Icon size={18} className={`${tone} shrink-0 mt-0.5 ${state === "active" ? "animate-spin" : ""}`} strokeWidth={2} />
+      <div>
+        <p className={`text-sm font-medium ${state === "pending" ? "text-ink-soft/60" : "text-[#004647]"}`}>{stage.label}</p>
+      </div>
+    </li>
+  );
+}
+
+// Measured characteristics, named only (the real values appear on the next screen).
+const CATEGORIES = [
+  { label: "Hydration", pos: "left-0 top-[18%]" },
+  { label: "Texture", pos: "right-0 top-[12%]" },
+  { label: "Tone", pos: "left-[4%] bottom-[14%]" },
+  { label: "Visible pores", pos: "right-0 bottom-[20%]" },
 ];
 
-export default function Processing({ go, photo, setAnalysis }) {
-  const [statusIndex, setStatusIndex] = useState(0);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+/* The user's own photo at the centre of quiet analysis rings: "your skin is being analysed". */
+function AnalysisVisual({ photo, running }) {
+  return (
+    <div className="relative mx-auto mb-7 aspect-square w-full max-w-[300px]">
+      <div aria-hidden="true" className="absolute inset-[6%] rounded-full bg-[radial-gradient(circle,#FFFFFF_0%,#E3ECEB_70%,transparent_72%)]" />
+      <svg aria-hidden="true" viewBox="0 0 200 200" className="absolute inset-0 h-full w-full">
+        <circle cx="100" cy="100" r="88" fill="none" stroke="#BDDCCD" strokeWidth="0.8" />
+        <motion.g style={{ transformOrigin: "100px 100px" }} animate={running ? { rotate: 360 } : {}} transition={{ duration: 24, repeat: Infinity, ease: "linear" }}>
+          <circle cx="100" cy="100" r="76" fill="none" stroke="#528778" strokeOpacity="0.45" strokeWidth="0.8" strokeDasharray="1.5 6" />
+          <circle cx="100" cy="24" r="2.4" fill="#005C5D" />
+          <circle cx="176" cy="100" r="1.8" fill="#9DD4CA" />
+        </motion.g>
+        <motion.g style={{ transformOrigin: "100px 100px" }} animate={running ? { rotate: -360 } : {}} transition={{ duration: 36, repeat: Infinity, ease: "linear" }}>
+          <circle cx="100" cy="100" r="64" fill="none" stroke="#9DD4CA" strokeOpacity="0.8" strokeWidth="0.8" strokeDasharray="30 12 4 12" />
+        </motion.g>
+      </svg>
+      <div className="absolute inset-[24%] overflow-hidden rounded-full bg-mist ring-4 ring-white shadow-float">
+        {photo && <img src={photo} alt="Your photo being analysed" className="h-full w-full object-cover -scale-x-100" />}
+        {running && (
+          <motion.div aria-hidden="true"
+            className="absolute inset-x-0 h-10 bg-gradient-to-b from-transparent via-white/35 to-transparent"
+            animate={{ top: ["-20%", "100%"] }} transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+      </div>
+      {CATEGORIES.map((c, i) => (
+        <motion.span key={c.label}
+          className={`absolute ${c.pos} rounded-full bg-white/90 backdrop-blur px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-jade shadow-soft border border-hairline`}
+          animate={running ? { opacity: [0.55, 1, 0.55] } : { opacity: 1 }}
+          transition={{ duration: 2.4, repeat: Infinity, delay: i * 0.6 }}
+        >
+          {c.label}
+        </motion.span>
+      ))}
+    </div>
+  );
+}
+
+export default function Processing({ go, photo, setPhoto, bodyPart, setAnalysis, signOut }) {
+  const [stage, setStage] = useState("upload");
+  const [error, setError] = useState(null);
   const [attempt, setAttempt] = useState(0);
-  const started = useRef(-1); 
+  const started = useRef(-1);
 
   useEffect(() => {
     if (started.current === attempt || !photo) return;
     started.current = attempt;
-    setError(""); setResult(null); setStatusIndex(0);
-    
-    // Begin API call
-    analyzeSkin(photo)
+    setError(null); setStage("upload");
+
+    analyzeSkin(photo, setStage, bodyPart)
       .then((res) => {
-        setResult(res);
         setAnalysis(res);
-        setTimeout(() => go("results"), 1500); // Small delay to let animations finish gracefully
+        // "Your photo is not stored and is deleted after analysis": the browser lets go of it too once it's done
+        // (the server never kept it). After a failed analysis it stays in memory only, for "Try again".
+        setTimeout(() => { go("profile"); setPhoto?.(null); }, 900); // let the last tick render
       })
-      .catch((e) => setError(e.message || "Something went wrong analyzing your photo."));
-  }, [photo, attempt, go, setAnalysis]);
+      .catch((e) => {
+        // the technical cause stays visible to developers; the user gets the matching advice
+        if (import.meta.env.DEV) console.warn("[skin analysis] failed", { status: e.status, reason: e.reason, kind: e.kind, message: e.message });
+        setError({
+          kind: e.kind ?? (e.status === 0 ? "network" : e.status === 401 ? "auth" : e.status === 429 ? "rate" : "server"),
+          message: e.message || "Something went wrong analyzing your photo.",
+        });
+      });
+  }, [photo, bodyPart, attempt, go, setAnalysis]);
 
-  useEffect(() => {
-    if (error || result) return;
-    const interval = setInterval(() => {
-      setStatusIndex((prev) => (prev + 1) % STATUS_TEXTS.length);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, [error, result]);
+  const current = ORDER.indexOf(stage);
+  const stateOf = (i) => (error && i === current ? "failed" : i < current ? "done" : i === current ? "active" : "pending");
 
-  if (error) {
-    return (
-      <div className="flex-1 w-full max-w-sm mx-auto flex flex-col items-center justify-center px-4 py-8 text-center">
-        <div className="w-16 h-16 bg-[#fcf4f3] rounded-full flex items-center justify-center border border-[#f0dedd] mb-6 shadow-sm">
-          <AlertCircle size={28} className="text-[#8a2e2e]" />
-        </div>
-        <h2 className="font-display text-3xl text-ink mb-3">Analysis failed</h2>
-        <p className="text-sm leading-relaxed text-ink-soft mb-8">{error}</p>
-        <div className="flex flex-col w-full gap-3">
-          <Button full onClick={() => setAttempt((a) => a + 1)} icon={RefreshCcw}>Try again</Button>
-          <Button variant="secondary" iconLeft={RotateCcw} icon={null} full onClick={() => go("camera")}>Retake photo</Button>
-        </div>
-      </div>
-    );
-  }
+  const help = error ? ERROR_HELP[error.kind] ?? ERROR_HELP.server : null;
 
   return (
-    <div className="flex-1 w-full max-w-sm mx-auto flex flex-col items-center justify-center px-4 py-8 text-center">
-      
-      {/* Scanning Image Container */}
-      <div className="relative w-48 aspect-[3/4] overflow-hidden rounded-hero bg-mist shadow-float border border-hairline mb-10">
-        {photo && <img src={photo} alt="" className="w-full h-full object-cover -scale-x-100" />}
-        
-        {/* Soft green overlay */}
-        <div className="absolute inset-0 bg-jade/10 mix-blend-multiply" />
-        
-        {/* Grid/Mesh Shimmer */}
-        <div 
-          className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay"
-          style={{ 
-            backgroundImage: "linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)",
-            backgroundSize: "20px 20px" 
-          }} 
-        />
+    <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col items-center justify-center px-4 py-6 sm:py-8 text-center">
+      <Eyebrow className="mb-2 text-jade tracking-[0.14em]">Step 5 &middot; Skin analysis</Eyebrow>
+      <h2 className="font-display text-3xl text-[#004647] mb-5">{error ? "Let's try that again" : stage === "done" ? "Your skin profile is ready" : "Analysing your skin"}</h2>
 
-        {/* Sweeping scan line */}
-        <motion.div 
-          className="absolute left-0 right-0 h-[2px] bg-jade-soft shadow-[0_0_15px_rgba(157,212,202,0.8)] z-10"
-          animate={{ top: ["5%", "95%", "5%"] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        />
-        
-        {/* Glowing corner brackets */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
-          <motion.g 
-            stroke="rgba(255,255,255,0.7)" 
-            strokeWidth="3" 
-            fill="none" 
-            strokeLinecap="round"
-            animate={{ opacity: [0.3, 0.8, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <path d="M 20 40 L 20 20 L 40 20" />
-            <path d="M 172 20 L 172 40 L 152 20" transform="translate(192, 0) scale(-1, 1)" />
-            <path d="M 20 216 L 20 236 L 40 236" transform="translate(0, 256) scale(1, -1)" />
-            <path d="M 172 236 L 172 216 L 152 236" transform="translate(192, 256) scale(-1, -1)" />
-          </motion.g>
-        </svg>
+      <div className="grid w-full grid-cols-1 md:grid-cols-2 items-center gap-2 md:gap-10">
+        <AnalysisVisual photo={photo} running={!error && stage !== "done"} />
+        <div className="w-full max-w-md mx-auto">
+          <ol className="w-full flex flex-col gap-4 bg-white/85 rounded-2xl border border-hairline shadow-soft p-5 mb-6" aria-live="polite">
+            {STAGES.map((s, i) => <StageRow key={s.key} stage={bodyPart === "hand" && s.handLabel ? { ...s, label: s.handLabel } : s} state={stateOf(i)} />)}
+          </ol>
+
+      {stage === "done" && !error && <p className="text-sm font-medium text-jade">Done. Opening your skin profile…</p>}
+
+      {error && (
+        <div className="w-full">
+          <div className="rounded-card bg-[#fcf4f3] border border-[#f0dedd] p-5 mb-5 text-left">
+            <p className="font-display text-xl text-[#8a2e2e] mb-1">{help.title}</p>
+            <p className="text-sm leading-relaxed text-ink-soft">{error.message}</p>
+          </div>
+          <div className="flex flex-col w-full gap-3">
+            {help.signup ? (
+              <Button full icon={null} onClick={() => { signOut?.(); go("about"); }}>Enter my details again</Button>
+            ) : help.retake ? (
+              <>
+                <Button full iconLeft={RotateCcw} icon={null} onClick={() => go("camera")}>Retake photo</Button>
+                <Button variant="secondary" full onClick={() => go("tips")} icon={null}>See photo tips</Button>
+              </>
+            ) : (
+              <>
+                <Button full onClick={() => setAttempt((a) => a + 1)} icon={RefreshCcw}>Try again</Button>
+                <Button variant="secondary" iconLeft={RotateCcw} icon={null} full onClick={() => go("camera")}>Retake photo</Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+        </div>
       </div>
-
-      {/* Indeterminate Loader Ring */}
-      <div className="relative w-12 h-12 mb-6">
-        <svg className="animate-spin w-full h-full" viewBox="0 0 50 50">
-          <circle className="stroke-mist" cx="25" cy="25" r="20" fill="none" strokeWidth="4" />
-          <circle className="stroke-jade" cx="25" cy="25" r="20" fill="none" strokeWidth="4" strokeLinecap="round" strokeDasharray="90 150" />
-        </svg>
-      </div>
-
-      {/* Rotating Status Text */}
-      <div className="h-8 relative w-full overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={statusIndex}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 flex justify-center text-sm font-medium text-jade"
-          >
-            {result ? "Complete!" : STATUS_TEXTS[statusIndex]}
-          </motion.p>
-        </AnimatePresence>
-      </div>
-
     </div>
   );
 }

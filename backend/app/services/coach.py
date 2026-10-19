@@ -1,6 +1,7 @@
 """
 Retrieval-Augmented Generation for Yuri AI. Retrieves the real, closest
 catalogue matches for the user's question via pgvector cosine similarity,
+keeps those the live store still sells (with their current details and price),
 then asks Claude to answer using ONLY that retrieved context. If nothing
 relevant is retrieved, Claude is instructed to say so rather than guess.
 """
@@ -24,6 +25,7 @@ Rules:
 
 
 def retrieve_context(db: Session, query: str, top_k: int = 4) -> list[Product]:
+    """Closest product records by embedding (rows of products the store sells and no longer sells)."""
     query_vector = embed_text(query)
 
     results = (
@@ -38,25 +40,29 @@ def retrieve_context(db: Session, query: str, top_k: int = 4) -> list[Product]:
     return [row[0] for row in results]
 
 
-def ask_yuri(db: Session, conversation_history: list[dict], question: str) -> tuple[str, list[str]]:
-    matched_products = retrieve_context(db, question)
+def ask_yuri(db: Session, conversation_history: list[dict], question: str, catalogue, top_k: int = 4) -> tuple[str, list[str]]:
+    """`catalogue`: the live store catalogue; only products it currently lists reach the context, with its data."""
+    matched_products = [row for row in retrieve_context(db, question, top_k * 2) if catalogue.get(row.shopify_product_id)][:top_k]
 
     context_lines = []
-    for p in matched_products:
+    for row in matched_products:
+        p = catalogue.get(row.shopify_product_id)
+        stock = "" if p.available else " | currently out of stock"
         context_lines.append(
             f"- {p.name} | ₹{p.price} | category: {p.category} | routine step: {p.routine_step} | "
-            f"addresses: {', '.join(p.concern_tags or []) or 'general use'} | {p.description or ''}"
+            f"addresses: {', '.join(p.concern_tags) or 'general use'}{stock} | {p.description or ''}"
         )
     context_block = "\n".join(context_lines) if context_lines else "No closely matching products found."
 
-    client = Anthropic(api_key=settings.anthropic_api_key)
+    # bounded wait: a slow or stalled reply becomes an APIError (handled in endpoints/coach.py), not a hung chat
+    client = Anthropic(api_key=settings.anthropic_api_key, timeout=settings.anthropic_timeout_seconds, max_retries=1)
 
     messages = conversation_history + [
         {"role": "user", "content": f"CONTEXT:\n{context_block}\n\nQUESTION: {question}"}
     ]
 
     response = client.messages.create(
-        model="claude-sonnet-4-6",
+        model=settings.anthropic_model,
         max_tokens=400,
         system=SYSTEM_PROMPT,
         messages=messages,

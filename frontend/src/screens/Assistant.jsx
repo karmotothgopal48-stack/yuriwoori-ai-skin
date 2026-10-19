@@ -131,7 +131,8 @@ export default function Assistant({ go }) {
         >
           <input 
             value={input} 
-            onChange={(e) => setInput(e.target.value)} 
+            onChange={(e) => setInput(e.target.value)}
+            maxLength={2000}
             placeholder="Ask Yuri anything about your skin…" 
             className="flex-1 bg-transparent px-4 py-3 text-[15px] outline-none text-ink placeholder:text-ink-soft" 
             disabled={typing}

@@ -16,6 +16,30 @@ export const IMAGES = {
   analysisFace: "/assets/ai-skin-analysis-face.png",
 };
 
+// AI Skin Analysis campaign portraits: text-free crops of YuriWoori's own campaign photo
+// (yuriwoori.com/cdn/shop/files/570x830-px-for-shopify-2.webp), studio pink background retouched to ivory,
+// so every screen shows the same model and look. To swap in a new photo, replace the file and move the
+// overlay points/labels (percent of the 4:5 image box) onto the new face.
+const CAMPAIGN_ALT = "YuriWoori model with glowing, natural skin";
+export const PORTRAITS = {
+  hero: {
+    src: "/assets/hero-portrait.webp", width: 960, height: 1200, alt: CAMPAIGN_ALT,
+    points: [{ x: 64, y: 28 }, { x: 75, y: 44 }, { x: 65, y: 47 }, { x: 63, y: 58 }], // forehead, cheek, nose, chin
+    labels: [
+      { text: "Texture · Tone", pos: { left: "7%", top: "20%" } },
+      { text: "Hydration", pos: { right: "5%", top: "34%" } },
+    ],
+  },
+  permission: {
+    src: "/assets/permission-portrait.webp", width: 800, height: 1000, alt: CAMPAIGN_ALT,
+    points: [{ x: 57, y: 32 }, { x: 70, y: 52 }, { x: 60, y: 57 }, { x: 57, y: 69 }], // forehead, cheek, nose, chin
+    labels: [
+      { text: "Hydration", pos: { right: "4%", top: "60%" } },
+      { text: "Even tone", pos: { left: "6%", top: "18%" } },
+    ],
+  },
+};
+
 export const LOGO = {
   // Exact logo file supplied by the client (opaque white background: use on white only)
   provided: "/assets/yuriwoori-logo-provided.png",

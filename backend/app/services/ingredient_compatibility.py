@@ -4,12 +4,33 @@ from app.db.models import ProductIngredient, IngredientInteraction
 
 def check_routine_compatibility(db: Session, product_ids: list) -> list[dict]:
     """Given a list of product IDs in one routine, return every real
-    interaction between ingredients those products actually contain."""
+    interaction between ingredients those products actually contain.
 
-    product_ingredients: dict = {}
-    for pid in product_ids:
-        links = db.query(ProductIngredient).filter(ProductIngredient.product_id == pid).all()
-        product_ingredients[pid] = {link.ingredient_id for link in links}
+    Two queries (the routine's ingredient links, then the interactions among those ingredients),
+    matched in memory - one query per ingredient pair took several seconds per routine."""
+
+    product_ingredients: dict = {pid: set() for pid in product_ids}
+    if not product_ids:
+        return []
+    for link in db.query(ProductIngredient).filter(ProductIngredient.product_id.in_(product_ids)).all():
+        product_ingredients[link.product_id].add(link.ingredient_id)
+
+    all_ingredients = set().union(*product_ingredients.values())
+    interactions: dict = {}
+    if all_ingredients:
+        rows = (
+            db.query(IngredientInteraction)
+            .filter(
+                IngredientInteraction.ingredient_a_id.in_(all_ingredients),
+                IngredientInteraction.ingredient_b_id.in_(all_ingredients),
+            )
+            .all()
+        )
+        for row in rows:
+            interactions.setdefault((row.ingredient_a_id, row.ingredient_b_id), row)
+
+    def interaction_between(a, b):
+        return interactions.get((a, b)) or interactions.get((b, a))
 
     flags = []
     seen_pairs = set()
@@ -23,20 +44,7 @@ def check_routine_compatibility(db: Session, product_ids: list) -> list[dict]:
                     if pair_key in seen_pairs:
                         continue
 
-                    interaction = (
-                        db.query(IngredientInteraction)
-                        .filter(
-                            (
-                                (IngredientInteraction.ingredient_a_id == ing_a_id)
-                                & (IngredientInteraction.ingredient_b_id == ing_b_id)
-                            )
-                            | (
-                                (IngredientInteraction.ingredient_a_id == ing_b_id)
-                                & (IngredientInteraction.ingredient_b_id == ing_a_id)
-                            )
-                        )
-                        .first()
-                    )
+                    interaction = interaction_between(ing_a_id, ing_b_id)
                     if interaction:
                         seen_pairs.add(pair_key)
                         flags.append(

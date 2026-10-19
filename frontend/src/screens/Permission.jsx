@@ -1,118 +1,102 @@
 import { useState } from "react";
-import { Camera, AlertCircle, Sun, User, Move, ShieldCheck } from "lucide-react";
-import { Button, Eyebrow } from "../components/Button";
-import { IMAGES } from "../theme/brand";
+import { Camera, AlertCircle, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
+import { Button, Eyebrow } from "../components/Button";
+import { AnalysisPortrait } from "../components/AnalysisPortrait";
+import { PORTRAITS } from "../theme/brand";
+import { describeCameraError, openCamera, stopStream } from "../services/camera";
 
-const BEFORE_SCAN = [
-  { icon: Sun, text: "Good lighting" },
-  { icon: User, text: "Bare face" },
-  { icon: Move, text: "Steady hold" },
-];
+function Portrait({ className = "" }) {
+  return (
+    <figure className={`relative w-full ${className}`}>
+      <div aria-hidden="true" className="absolute -inset-2 sm:-inset-3 rounded-[1.75rem] sm:rounded-[2.25rem] border border-sage-light/70" />
+      <AnalysisPortrait portrait={PORTRAITS.permission} priority>
+        <span className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-pill bg-white/90 backdrop-blur-md px-4 py-2 shadow-soft border border-white text-[10px] font-semibold uppercase tracking-[0.16em] text-jade">
+          AI Skin Analysis
+        </span>
+      </AnalysisPortrait>
+    </figure>
+  );
+}
 
 export default function Permission({ go }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   const allow = async () => {
-    setBusy(true); 
+    setBusy(true);
     setError("");
     try {
-      const s = await navigator.mediaDevices.getUserMedia({ video: true });
-      s.getTracks().forEach((t) => t.stop());
+      stopStream(await openCamera(true)); // only asks for permission; the Camera step opens it again
       go("tips");
     } catch (e) {
-      setError(e.name === "NotAllowedError"
-        ? "Camera access was blocked. Please allow it in your browser settings to continue."
-        : "No camera could be opened on this device.");
-    } finally { 
-      setBusy(false); 
+      console.warn("Camera could not be opened:", e);
+      setError(describeCameraError(e));
+    } finally {
+      setBusy(false);
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row items-center w-full px-4 sm:px-8 py-6 sm:py-12 gap-8 md:gap-16">
-      
-      {/* Left: Visual (50%) */}
-      <div className="w-full md:w-1/2 flex justify-center items-center relative min-h-[35vh] md:min-h-0 h-full">
-        {/* Soft radial glow */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-jade-soft)_0%,transparent_60%)] opacity-20 blur-3xl" />
-        
-        <motion.div 
-          className="relative w-full max-w-sm overflow-hidden rounded-hero shadow-float border border-hairline bg-white/50"
-          animate={{ y: [-4, 4, -4], scale: [0.99, 1, 0.99] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <img
-            src={IMAGES.analysisFace} 
-            alt="AI skin analysis"
-            className="w-full h-auto object-cover object-top aspect-[4/5] sm:aspect-auto"
-          />
-          {/* Decorative Chip */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-pill bg-white/90 backdrop-blur-md px-5 py-2.5 shadow-soft border border-white">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-jade">AI Skin Analysis</p>
-          </div>
-        </motion.div>
+    <div className="relative flex-1 w-full">
+      {/* One faint sage wash behind the portrait */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-1/2 w-screen -translate-x-1/2 overflow-hidden">
+        <div className="absolute left-[-8%] top-1/2 h-[34rem] w-[34rem] -translate-y-1/2 rounded-full bg-mist blur-3xl opacity-80" />
       </div>
 
-      {/* Right: Content (50%) */}
-      <div className="w-full md:w-1/2 max-w-md mx-auto md:mx-0 flex flex-col justify-center">
-        <Eyebrow className="mb-4">Step 1 &middot; Permission</Eyebrow>
-        
-        <h1 className="font-display text-4xl sm:text-5xl leading-tight mb-4 text-[#004647]">
-          Let&apos;s understand your skin
-        </h1>
-        
-        <p className="text-base text-ink-soft mb-8 leading-relaxed">
-          We need access to your camera to capture a clear photo of your face. This helps our AI analyze your unique skin profile.
-        </p>
-
-        {error && (
-          <motion.p 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 flex items-start gap-2.5 rounded-card bg-[#fcf4f3] p-4 text-sm text-[#8a2e2e] border border-[#f0dedd]"
-          >
-            <AlertCircle size={18} className="shrink-0 mt-0.5" /> 
-            <span>{error}</span>
-          </motion.p>
-        )}
-
-        <div className="flex items-center gap-6 mb-8">
-          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-jade/10">
-            <div className="absolute inset-0 rounded-full border-2 border-jade/30 animate-[pulse-ring_2.5s_cubic-bezier(0.215,0.61,0.355,1)_infinite]" />
-            <Camera size={24} className="text-jade" strokeWidth={1.5} />
-          </div>
-          <Button full onClick={allow} loading={busy} className="flex-1">Allow Camera</Button>
-        </div>
-        
-        <div className="flex justify-center mb-8">
-          <Button variant="tertiary" onClick={() => go("start")}>Maybe later</Button>
+      <div className="relative mx-auto grid max-w-5xl grid-cols-1 items-center gap-6 px-5 pt-5 pb-8 sm:px-8 md:grid-cols-[0.85fr_1fr] md:gap-14 md:py-8">
+        {/* Desktop: portrait in the left column */}
+        <div className="hidden md:flex justify-center">
+          <Portrait className="max-w-[340px] lg:max-w-[380px]" />
         </div>
 
-        <p className="flex items-center justify-center gap-2 text-xs font-medium text-ink-soft mb-10">
-          <ShieldCheck size={16} className="text-jade shrink-0" strokeWidth={1.5} />
-          Your privacy is protected. Photos are never stored.
-        </p>
-
-        {/* Before you scan cards */}
-        <div className="border-t border-hairline pt-8">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-ink-soft mb-4 text-center sm:text-left">
-            Before you scan
+        <div className="w-full max-w-md mx-auto md:mx-0">
+          <Eyebrow className="text-jade tracking-[0.14em]">Step 1 &middot; Permission</Eyebrow>
+          <h1 className="mt-2 font-display text-[32px] sm:text-[40px] leading-[1.1] text-[#004647]">
+            Let&apos;s understand <br className="hidden md:block" />your skin
+          </h1>
+          <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+            We need access to your camera to capture a clear photo of your face. The photo is measured with image analysis to build your skin profile.
           </p>
-          <div className="flex justify-between sm:justify-start gap-3 sm:gap-6">
-            {BEFORE_SCAN.map(({ icon: Icon, text }) => (
-              <div key={text} className="flex flex-col items-center sm:items-start gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-soft border border-mist">
-                  <Icon size={18} className="text-jade" strokeWidth={1.5} />
-                </div>
-                <span className="text-[11px] font-semibold text-ink-soft text-center sm:text-left leading-tight w-16 sm:w-auto">{text}</span>
-              </div>
-            ))}
+
+          {/* Mobile: portrait after the explanation */}
+          <div className="md:hidden mt-6 flex justify-center">
+            <Portrait className="max-w-[205px]" />
           </div>
+
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} role="alert"
+              className="mt-5 flex items-start gap-2.5 rounded-card bg-[#fcf4f3] p-4 text-sm text-[#8a2e2e] border border-[#f0dedd]"
+            >
+              <AlertCircle size={18} className="shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </motion.p>
+          )}
+
+          <div className="mt-6 flex items-center gap-4">
+            <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-mist border border-jade-line">
+              <Camera size={20} className="text-jade" strokeWidth={1.5} />
+            </span>
+            <Button full onClick={allow} loading={busy} className="flex-1">Allow Camera</Button>
+          </div>
+
+          <div className="mt-2 flex justify-center pl-16">
+            <button type="button" onClick={() => go("start")}
+              className="min-h-[44px] px-3 text-sm font-medium text-ink-soft underline-offset-4 hover:text-jade hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade rounded-sm">
+              Maybe later
+            </button>
+          </div>
+
+          {/* Verified behaviour: the photo is sent to the server, analysed in memory and discarded (never written to disk,
+              the database or logs: backend endpoints/scans.py); the scan results are saved, linked to the name + email entered */}
+          <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-ink-soft">
+            <ShieldCheck size={15} className="text-jade shrink-0 mt-0.5" strokeWidth={1.5} />
+            <span>Your photo is sent to the YuriWoori server for analysis and then discarded — it is never saved. Your scan results are saved together with the name and email you entered.</span>
+          </p>
+
         </div>
       </div>
-      
     </div>
   );
 }
