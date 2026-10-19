@@ -25,7 +25,7 @@ function SectionHeading({ id, kicker, title, children, aside }) {
       className="mb-8 flex flex-col gap-5 md:mb-10 lg:flex-row lg:items-end lg:justify-between">
       <div className="max-w-2xl">
         <Kicker>{kicker}</Kicker>
-        <h2 id={id} className="mt-3 font-display text-[30px] leading-[1.1] text-[#004647] sm:text-[38px]">{title}</h2>
+        <h2 id={id} className="mt-3 font-display text-[30px] leading-[1.1] text-jade-deep sm:text-[38px]">{title}</h2>
         {children && <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">{children}</p>}
       </div>
       {aside}
@@ -43,7 +43,7 @@ function SkinProfileHero({ photo, profile, count, hand }) {
           <img src="/assets/yuriwoori-heart-green.png" alt="" aria-hidden="true" className="h-4 w-auto opacity-80" />
           <Kicker>Your skin profile</Kicker>
         </motion.div>
-        <motion.h1 id="profile-title" variants={fadeUp} className="mt-4 font-display text-[42px] leading-[1.02] text-[#004647] sm:text-[56px] lg:text-[64px]">
+        <motion.h1 id="profile-title" variants={fadeUp} className="mt-4 font-display text-[42px] leading-[1.02] text-jade-deep sm:text-[56px] lg:text-[64px]">
           Your skin,<br />beautifully understood.
         </motion.h1>
         <motion.p variants={fadeUp} className="mx-auto mt-5 max-w-md text-[15px] leading-relaxed text-ink-soft md:mx-0">
@@ -52,12 +52,12 @@ function SkinProfileHero({ photo, profile, count, hand }) {
         <motion.dl variants={fadeUp} className="mt-8 inline-grid grid-cols-2 items-end gap-x-10 border-t border-sage-light/70 pt-6 text-left">
           <div>
             <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sage">Skin type</dt>
-            <dd className="mt-2 font-display text-[30px] leading-none text-[#004647]">{profile.skinType}</dd>
+            <dd className="mt-2 font-display text-[30px] leading-none text-jade-deep">{profile.skinType}</dd>
           </div>
           {profile.overall != null && (
             <div>
               <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sage">Overall skin score</dt>
-              <dd className="mt-1 font-display text-[56px] leading-none text-[#004647] tabular-nums">
+              <dd className="mt-1 font-display text-[56px] leading-none text-jade-deep tabular-nums">
                 <CountUp value={profile.overall} /><span className="font-sans text-[14px] text-ink-soft/60">/100</span>
               </dd>
             </div>
@@ -81,7 +81,7 @@ function SkinProfileHero({ photo, profile, count, hand }) {
           {photo
             ? <img src={photo} alt="Your photo used for this analysis" className="h-full w-full object-cover -scale-x-100" />
             : <div className="flex h-full flex-col items-center justify-center gap-3 px-8 text-center text-sm text-ink-soft"><Ripple className="h-20 w-20" />Your photo is no longer available. It was shown only on this device during your session and is never stored.</div>}
-          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#004647]/35 to-transparent" />
+          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-jade-deep/35 to-transparent" />
           <figcaption className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/90 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-jade shadow-soft backdrop-blur">
             YuriWoori scan · {count} characteristics
           </figcaption>
@@ -115,7 +115,7 @@ function SkinSummary({ profile, activeConcerns, flagged }) {
         </span>
         <div className="max-w-3xl">
           <Kicker>Your skin at a glance</Kicker>
-          <h2 id="summary-title" className="mt-2 font-display text-[26px] leading-tight text-[#004647] sm:text-[32px]">{title}</h2>
+          <h2 id="summary-title" className="mt-2 font-display text-[26px] leading-tight text-jade-deep sm:text-[32px]">{title}</h2>
           <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">{body}</p>
         </div>
       </div>
@@ -134,7 +134,7 @@ function MeasurementRow({ c, index }) {
           <SkinVisual metric={c.id} className="h-14 w-14 shrink-0 drop-shadow-[0_3px_6px_rgba(0,70,71,0.08)]" />
           <div className="min-w-0">
             <p className="text-[10px] font-semibold tracking-[0.2em] text-sage/80">{String(index + 1).padStart(2, "0")}</p>
-            <h3 className="font-display text-[24px] leading-tight text-[#004647]">{c.label}</h3>
+            <h3 className="font-display text-[24px] leading-tight text-jade-deep">{c.label}</h3>
             <p className="mt-0.5 text-[12px] text-ink-soft/75">{c.higherIsBetter ? "Higher is better" : "Higher means more of this trait"}</p>
           </div>
         </div>
@@ -147,9 +147,9 @@ function MeasurementRow({ c, index }) {
             </p>
           </div>
           <div className="border-l border-sage-light/70 pl-6">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#004647]">Your result</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-jade-deep">Your result</p>
             <p className="mt-1.5 flex items-center gap-2.5">
-              <span className="font-display text-[44px] leading-none text-[#004647] tabular-nums">{c.yourResult}<span className="font-sans text-[12px] text-ink-soft/60">/100</span></span>
+              <span className="font-display text-[44px] leading-none text-jade-deep tabular-nums">{c.yourResult}<span className="font-sans text-[12px] text-ink-soft/60">/100</span></span>
               <BenchmarkDelta c={c} delay={1.05} />
             </p>
           </div>
@@ -159,7 +159,7 @@ function MeasurementRow({ c, index }) {
       </div>
 
       <details className="group mt-4 lg:ml-[4.5rem]">
-        <summary className="inline-flex min-h-[32px] cursor-pointer list-none items-center gap-1.5 rounded-sm text-[12px] font-semibold text-jade hover:text-[#004647] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade [&::-webkit-details-marker]:hidden">
+        <summary className="inline-flex min-h-[32px] cursor-pointer list-none items-center gap-1.5 rounded-sm text-[12px] font-semibold text-jade hover:text-jade-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade [&::-webkit-details-marker]:hidden">
           What was measured
           <ChevronDown size={14} className="transition-transform group-open:rotate-180" aria-hidden="true" />
         </summary>
@@ -195,7 +195,7 @@ const JOURNEY = [{ label: "Analysis complete", done: true }, { label: "Routine r
 function RoutineCTA({ go }) {
   return (
     <motion.section initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} variants={fadeUp} aria-labelledby="routine-title"
-      className="relative mb-10 overflow-hidden rounded-[36px] bg-[#004647] px-6 py-14 text-center text-cream sm:px-12 sm:py-20">
+      className="relative mb-10 overflow-hidden rounded-[36px] bg-jade-deep px-6 py-14 text-center text-cream sm:px-12 sm:py-20">
       <BotanicalSprig className="pointer-events-none absolute -right-10 -bottom-12 h-72 w-auto sm:-right-4 sm:h-80" stroke="#9DD4CA" opacity={0.35} />
       <div className="relative mx-auto max-w-2xl">
         <ol className="mx-auto flex max-w-md flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-jade-soft sm:flex-nowrap sm:gap-3 sm:text-[11px]"
@@ -204,7 +204,7 @@ function RoutineCTA({ go }) {
             <li key={s.label} className="flex items-center gap-2 sm:gap-3">
               {i > 0 && <span aria-hidden="true" className="hidden h-px w-8 bg-jade-soft/50 sm:block" />}
               <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <span aria-hidden="true" className={`flex h-4 w-4 items-center justify-center rounded-full border ${s.done ? "border-jade-soft bg-jade-soft text-[#004647]" : "border-jade-soft/70"}`}>
+                <span aria-hidden="true" className={`flex h-4 w-4 items-center justify-center rounded-full border ${s.done ? "border-jade-soft bg-jade-soft text-jade-deep" : "border-jade-soft/70"}`}>
                   {s.done && <Check size={10} strokeWidth={3} />}
                 </span>
                 {s.label}
@@ -219,7 +219,7 @@ function RoutineCTA({ go }) {
           Based on your skin analysis, discover the YuriWoori products selected for your skincare routine.
         </p>
         <button type="button" onClick={() => go("routine")}
-          className="mt-9 inline-flex min-h-[52px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-pill bg-cream px-10 text-[15px] font-semibold tracking-wide text-[#004647] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.35)] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:w-auto">
+          className="mt-9 inline-flex min-h-[52px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-pill bg-cream px-10 text-[15px] font-semibold tracking-wide text-jade-deep shadow-[0_10px_30px_-10px_rgba(0,0,0,0.35)] transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:w-auto">
           See my routine <ArrowRight size={17} aria-hidden="true" />
         </button>
       </div>

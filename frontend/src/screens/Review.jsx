@@ -12,8 +12,8 @@ export default function Review({ go, photo, bodyPart = "face" }) {
   return (
     <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
       <div className="text-center mb-6 sm:mb-8">
-        <Eyebrow className="mb-2 text-jade tracking-[0.14em]">Step 4 &middot; Review</Eyebrow>
-        <h2 className="font-display text-3xl sm:text-4xl text-[#004647]">Review your scan</h2>
+        <Eyebrow className="mb-2 text-jade tracking-[0.14em]">Review</Eyebrow>
+        <h2 className="font-display text-3xl sm:text-4xl text-jade-deep">Review your scan</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] items-center gap-6 md:gap-10 justify-items-center md:justify-items-stretch">
@@ -59,7 +59,7 @@ export default function Review({ go, photo, bodyPart = "face" }) {
             </p>
           </div>
 
-          <p className="mt-4 flex items-start gap-2 rounded-xl bg-mist/60 border border-jade-line/50 px-3.5 py-2.5 text-[13px] leading-relaxed text-[#004647]">
+          <p className="mt-4 flex items-start gap-2 rounded-xl bg-mist/60 border border-jade-line/50 px-3.5 py-2.5 text-[13px] leading-relaxed text-jade-deep">
             <ShieldCheck size={16} className="mt-0.5 shrink-0" strokeWidth={1.75} aria-hidden="true" />
             <span>Your photo is not stored and is deleted after analysis.</span>
           </p>
@@ -69,7 +69,7 @@ export default function Review({ go, photo, bodyPart = "face" }) {
               Retake
             </Button>
             <Button full icon={Sparkles} onClick={() => go("processing")} disabled={!photo}>
-              Analyze My Skin
+              Analyse My Skin
             </Button>
           </div>
         </div>

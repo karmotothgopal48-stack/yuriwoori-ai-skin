@@ -71,7 +71,7 @@ export function PrivacyPolicyModal({ open, onClose }) {
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="flex items-center justify-between gap-4 border-b border-hairline px-6 py-4">
-              <h2 id="privacy-policy-title" className="font-display text-2xl text-[#004647]">Privacy Policy</h2>
+              <h2 id="privacy-policy-title" className="font-display text-2xl text-jade-deep">Privacy Policy</h2>
               <button type="button" onClick={onClose} aria-label="Close privacy policy"
                 className="p-2 -mr-2 rounded-full text-ink-soft hover:text-ink hover:bg-mist focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jade">
                 <X size={20} strokeWidth={1.5} />

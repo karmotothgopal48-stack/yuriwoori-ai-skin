@@ -183,7 +183,7 @@ export default function Camera({ go, setPhoto, setBodyPart }) {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center w-full max-w-md mx-auto px-4 py-4 sm:py-6">
-      <Eyebrow className="mb-3 text-jade tracking-[0.14em]">Step 3 &middot; Camera</Eyebrow>
+      <Eyebrow className="mb-3 text-jade tracking-[0.14em]">Camera</Eyebrow>
 
       {/* Viewfinder Container */}
       <div className="relative w-full max-w-[380px] aspect-[3/4] max-h-[64vh] overflow-hidden rounded-[2rem] bg-[#16302f] shadow-float ring-[6px] ring-white outline outline-1 outline-sage-light">
@@ -217,8 +217,8 @@ export default function Camera({ go, setPhoto, setBodyPart }) {
         {/* Error State */}
         {state === "error" && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-5 p-8 text-center bg-cream">
-            <div className="w-16 h-16 bg-[#fcf4f3] rounded-full flex items-center justify-center border border-[#f0dedd]">
-              <AlertCircle size={28} className="text-[#8a2e2e]" />
+            <div className="w-16 h-16 bg-danger-soft rounded-full flex items-center justify-center border border-danger-line">
+              <AlertCircle size={28} className="text-danger" />
             </div>
             <div>
               <p className="text-lg font-display text-ink mb-2">Camera unavailable</p>
@@ -294,7 +294,7 @@ export default function Camera({ go, setPhoto, setBodyPart }) {
       </div>
 
       {uploadError && (
-        <p role="alert" className="mt-4 w-full max-w-[380px] flex items-start gap-2 rounded-xl bg-[#fcf4f3] border border-[#f0dedd] p-3 text-sm text-[#8a2e2e]">
+        <p role="alert" className="mt-4 w-full max-w-[380px] flex items-start gap-2 rounded-xl bg-danger-soft border border-danger-line p-3 text-sm text-danger">
           <AlertCircle size={16} className="shrink-0 mt-0.5" /> {uploadError}
         </p>
       )}
@@ -318,7 +318,7 @@ export default function Camera({ go, setPhoto, setBodyPart }) {
         >
           <div className={`absolute inset-0 rounded-full border-2 transition-colors duration-300 ${locked ? "border-jade" : "border-jade-line"} group-hover:scale-105 group-active:scale-95 transition-transform`} />
           <div className="absolute inset-[5px] bg-white rounded-full group-active:scale-95 transition-transform duration-300 shadow-float flex items-center justify-center">
-            <div className="w-[52px] h-[52px] rounded-full bg-[radial-gradient(circle_at_35%_30%,#1b7a7a,#005C5D_60%,#004647)] shadow-inner group-hover:scale-95 transition-transform duration-300" />
+            <div className="w-[52px] h-[52px] rounded-full bg-[radial-gradient(circle_at_35%_30%,#1b7a7a,#006968_60%,#004E4D)] shadow-inner group-hover:scale-95 transition-transform duration-300" />
           </div>
         </button>
 
@@ -335,7 +335,7 @@ export default function Camera({ go, setPhoto, setBodyPart }) {
       <p className="mt-4 text-center text-[12px] text-ink-soft">Your photo is not stored and is deleted after analysis.</p>
 
       {state === "live" && (
-        <label className="mt-5 inline-flex cursor-pointer items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-jade underline-offset-4 hover:underline hover:text-[#004647]">
+        <label className="mt-5 inline-flex cursor-pointer items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-jade underline-offset-4 hover:underline hover:text-jade-deep">
           <Upload size={14} strokeWidth={2} /> Upload a photo instead
           <input type="file" accept="image/*" className="sr-only" onChange={upload} />
         </label>

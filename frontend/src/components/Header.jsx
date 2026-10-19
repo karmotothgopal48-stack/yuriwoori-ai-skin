@@ -14,7 +14,8 @@ export function Header({ onHome, step, total = 11, label, actions }) {
 
   return (
     <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-hairline" style={{ "--logo-w": LOGO_W }}>
-      <div className="mx-auto grid h-[calc(var(--logo-w)*638/774+18px)] sm:h-[calc(var(--logo-w)*638/774+19px)] max-w-7xl grid-cols-[4.75rem_minmax(0,1fr)_4.75rem] items-center gap-3 px-4 sm:grid-cols-[6rem_minmax(0,1fr)_6rem] sm:px-6">
+      {/* min-height + padding (not a fixed height), so the step line below the logo always has room and never overlaps it */}
+      <div className="mx-auto grid min-h-[calc(var(--logo-w)*638/774+18px)] py-2 sm:min-h-[calc(var(--logo-w)*638/774+19px)] max-w-7xl grid-cols-[4.75rem_minmax(0,1fr)_4.75rem] items-center gap-3 px-4 sm:grid-cols-[6rem_minmax(0,1fr)_6rem] sm:px-6">
         <span aria-hidden="true" />
 
         <div className="flex min-w-0 flex-col items-center justify-center">
@@ -23,9 +24,9 @@ export function Header({ onHome, step, total = 11, label, actions }) {
             <OfficialLogo width="var(--logo-w)" />
           </button>
           {isFlow && (
-            <p className="max-w-full truncate text-center text-[10px] font-semibold uppercase leading-3 tracking-[0.14em] text-ink-soft sm:text-[11px]">
+            <p className="mt-1.5 max-w-full truncate text-center text-[11px] font-semibold uppercase leading-4 tracking-[0.14em] text-ink-soft">
               Step {step} of {total}
-              {label && <span className="hidden sm:inline"><span aria-hidden="true" className="mx-2 text-sage-light">·</span><span className="text-[#004647]">{label}</span></span>}
+              {label && <span className="hidden sm:inline"><span aria-hidden="true" className="mx-2 text-sage-light">·</span><span className="text-jade-deep">{label}</span></span>}
             </p>
           )}
         </div>

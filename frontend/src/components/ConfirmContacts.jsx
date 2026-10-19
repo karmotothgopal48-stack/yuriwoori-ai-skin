@@ -39,7 +39,7 @@ export function ConfirmContacts({ onDone }) {
   return (
     <section aria-labelledby="confirm-title" className="relative mt-4 w-full max-w-[560px] rounded-card bg-white border border-hairline shadow-float px-5 py-6 sm:px-9">
       <Eyebrow className="text-jade">Your report</Eyebrow>
-      <h2 id="confirm-title" className="mt-1 font-display text-[24px] leading-tight text-[#004647]">Verify your mobile number</h2>
+      <h2 id="confirm-title" className="mt-1 font-display text-[24px] leading-tight text-jade-deep">Verify your mobile number</h2>
       <p className="mt-2 text-[14px] leading-relaxed text-ink-soft">
         We'll send a 6-digit code by WhatsApp to confirm this number is yours. {status.report_consent
           ? "Once it's verified, your skin-analysis report is sent automatically when your analysis is done."
@@ -47,12 +47,12 @@ export function ConfirmContacts({ onDone }) {
       </p>
 
       <div className="mt-4 rounded-2xl border border-hairline bg-white p-4">
-        <p className="flex items-center gap-2 text-[14px] font-semibold text-[#004647]">
+        <p className="flex items-center gap-2 text-[14px] font-semibold text-jade-deep">
           <MessageCircle size={16} className="text-jade" aria-hidden="true" />WhatsApp
           <span className="font-normal text-ink-soft">· {number}</span>
         </p>
         {verified ? (
-          <p className="mt-2 flex items-center gap-2 text-[13px] text-[#004647]" role="status"><CheckCircle2 size={15} aria-hidden="true" />Mobile number verified</p>
+          <p className="mt-2 flex items-center gap-2 text-[13px] text-jade-deep" role="status"><CheckCircle2 size={15} aria-hidden="true" />Mobile number verified</p>
         ) : !sent ? (
           <button type="button" onClick={request} disabled={busy}
             className="mt-3 inline-flex min-h-[40px] items-center gap-2 rounded-pill border border-jade-line bg-white px-5 text-[13px] font-semibold text-jade hover:bg-mist disabled:opacity-60">
@@ -66,13 +66,13 @@ export function ConfirmContacts({ onDone }) {
                 className="h-10 w-36 rounded-xl border border-sage-light px-3 text-[15px] tracking-[0.3em] tabular-nums outline-none focus:border-jade focus:ring-4 focus:ring-jade/10" />
             </label>
             <button type="submit" disabled={busy || !codeOk}
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-pill bg-jade px-5 text-[13px] font-semibold text-cream hover:bg-[#004647] disabled:opacity-60">
+              className="inline-flex min-h-[40px] items-center gap-2 rounded-pill bg-jade px-5 text-[13px] font-semibold text-cream hover:bg-jade-deep disabled:opacity-60">
               {busy && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}Verify
             </button>
             <button type="button" onClick={request} disabled={busy} className="min-h-[40px] text-[12px] font-semibold uppercase tracking-[0.12em] text-jade">Send a new code</button>
           </form>
         )}
-        {error && <p className="mt-2 text-[13px] text-[#9a3b35]" role="alert">{error}</p>}
+        {error && <p className="mt-2 text-[13px] text-danger-strong" role="alert">{error}</p>}
       </div>
 
       {verified ? (

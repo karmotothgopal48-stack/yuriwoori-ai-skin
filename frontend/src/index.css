@@ -2,12 +2,15 @@
 
 @theme {
   /* Colors */
-  --color-jade: #005c5d; /* Primary deep green */
+  /* Greens measured on yuriwoori.com (docs/brand-sheet.md): #006968 is the store's action green, #004e4d its deep green */
+  --color-jade: #006968; /* Primary action green (buttons, links, progress) */
+  --color-jade-deep: #004e4d; /* Headings and emphasis */
   --color-jade-soft: #9dd4ca; /* 40% tint */
   --color-jade-line: #bddccd; /* 20% tint */
   --color-mist: #e3eceb; /* 10% tint */
-  --color-sage: #528778; 
-  --color-sage-light: #c6d6c9; 
+  --color-sage: #47705f; /* Small labels and eyebrows: >= 4.5:1 on cream, mist and white (WCAG AA) */
+  --color-sage-light: #c6d6c9;
+  --color-hairline: #c6d6c9; /* Card and divider lines: a colour only, pair with border / border-b / border-t */
   --color-cream: #f1f5eb; /* Warm ivory / soft cream background */
   --color-white: #ffffff; /* Surface white */
   --color-ink: #1c2b2a; /* Deep green-charcoal text */
@@ -16,6 +19,11 @@
   --color-success: #a3b899; /* Soft success green */
   --color-caution: #e3c18b; /* Soft amber */
   --color-error: #cca7a2; /* Muted rose */
+  /* Error and warning messages (were repeated as hex values in the screens) */
+  --color-danger: #8a2e2e; /* Error titles */
+  --color-danger-strong: #9a3b35; /* Error text and icons */
+  --color-danger-soft: #fcf4f3; /* Error panel background */
+  --color-danger-line: #f0dedd; /* Error panel border */
 
   /* Typography */
   --font-display: "DM Serif Display", "Times New Roman", serif;
@@ -70,11 +78,6 @@ h1, h2, h3, h4, h5, h6, .font-display {
   font-size: var(--text-xs);
   color: var(--color-sage);
   font-weight: 500;
-}
-
-/* Hairline border utility */
-.border-hairline {
-  border: 1px solid var(--color-sage-light);
 }
 
 /* Subtle noise overlay (optional) */

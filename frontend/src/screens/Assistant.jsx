@@ -32,7 +32,7 @@ export default function Assistant({ go }) {
   };
 
   return (
-    <div className="flex flex-col h-[dvh] w-full max-w-3xl mx-auto bg-white shadow-xl sm:border-x sm:border-hairline">
+    <div className="flex flex-1 flex-col w-full max-w-3xl mx-auto bg-white shadow-xl sm:border-x sm:border-hairline">
       
       {/* Header */}
       <div className="flex items-center gap-4 px-6 py-4 border-b border-hairline bg-white/80 backdrop-blur-md z-10 shrink-0">
@@ -141,7 +141,7 @@ export default function Assistant({ go }) {
             type="submit" 
             disabled={!input.trim() || typing}
             aria-label="Send message" 
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-jade text-white shadow-sm hover:bg-[#004647] disabled:opacity-50 disabled:hover:bg-jade transition-colors ml-2"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-jade text-white shadow-sm hover:bg-jade-deep disabled:opacity-50 disabled:hover:bg-jade transition-colors ml-2"
           >
             <Send size={18} strokeWidth={2.5} className="ml-0.5" />
           </button>

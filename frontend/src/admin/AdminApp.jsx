@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, Download, LogOut, RefreshCcw } from "lucide-react";
 import { Button, Eyebrow } from "../components/Button";
-import { ProvidedLogo } from "../components/Logo";
+import { OfficialLogo } from "../components/Logo";
 import { api } from "../services/api";
 import { getAdminToken, setAdminToken } from "../services/session";
 
@@ -23,13 +23,13 @@ function Login({ onLogin }) {
   return (
     <div className="flex-1 w-full max-w-sm mx-auto px-4 py-16">
       <Eyebrow className="mb-3 text-center">Admin</Eyebrow>
-      <h1 className="font-display text-3xl text-[#004647] mb-8 text-center">Skin analysis reports</h1>
+      <h1 className="font-display text-3xl text-jade-deep mb-8 text-center">Skin analysis reports</h1>
       <form onSubmit={submit} className="flex flex-col gap-4 bg-white rounded-card border border-hairline shadow-soft p-6">
         <label className="flex flex-col gap-1.5"><span className="text-sm font-medium">Admin email</span>
           <input className={field} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required /></label>
         <label className="flex flex-col gap-1.5"><span className="text-sm font-medium">Password</span>
           <input className={field} type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required /></label>
-        {error && <p className="flex gap-2 rounded-xl bg-[#fcf4f3] border border-[#f0dedd] p-3 text-sm text-[#8a2e2e]" role="alert"><AlertCircle size={16} className="shrink-0 mt-0.5" />{error}</p>}
+        {error && <p className="flex gap-2 rounded-xl bg-danger-soft border border-danger-line p-3 text-sm text-danger" role="alert"><AlertCircle size={16} className="shrink-0 mt-0.5" />{error}</p>}
         <Button type="submit" full loading={busy} disabled={!email || !password}>Log in</Button>
       </form>
     </div>
@@ -42,7 +42,7 @@ function Metric({ label, value, note }) {
   return (
     <div className="rounded-card bg-white border border-hairline shadow-soft p-5">
       <p className="text-[11px] font-semibold uppercase tracking-widest text-ink-soft mb-2">{label}</p>
-      <p className="font-display text-3xl text-[#004647]">{fmt(value)}</p>
+      <p className="font-display text-3xl text-jade-deep">{fmt(value)}</p>
       {note && <p className="mt-1 text-[11px] text-ink-soft/80">{note}</p>}
     </div>
   );
@@ -63,7 +63,7 @@ function SheetSync({ sheet }) {
         {["pending", "syncing", "synced", "failed"].map((k) => <Metric key={k} label={k} value={counts[k] || 0} />)}
       </div>
       {sheet.problems.length > 0 && (
-        <ul className="mb-4 list-disc pl-5 text-[13px] text-[#8a2e2e]">{sheet.problems.map((p) => <li key={p}>{p}</li>)}</ul>)}
+        <ul className="mb-4 list-disc pl-5 text-[13px] text-danger">{sheet.problems.map((p) => <li key={p}>{p}</li>)}</ul>)}
       {Object.keys(sheet.failed_by_error || {}).length > 0 && (
         <p className="mb-4 text-[13px] text-ink">Failures by reason: {Object.entries(sheet.failed_by_error).map(([e, n]) => `${e} (${n})`).join(", ")}</p>)}
       {sheet.items.length === 0 ? <p className="text-sm text-ink-soft">No customers queued yet.</p> : (
@@ -121,7 +121,7 @@ function Dashboard({ onLogout }) {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
           <Eyebrow className="mb-2">Admin dashboard</Eyebrow>
-          <h1 className="font-display text-3xl sm:text-4xl text-[#004647]">Skin analysis reports</h1>
+          <h1 className="font-display text-3xl sm:text-4xl text-jade-deep">Skin analysis reports</h1>
           {s && <p className="text-xs text-ink-soft mt-1">Generated {s.generated_at} · {s.timezone}</p>}
         </div>
         <div className="flex gap-3">
@@ -130,7 +130,7 @@ function Dashboard({ onLogout }) {
         </div>
       </div>
 
-      {error && <p className="mb-6 flex gap-2 rounded-xl bg-[#fcf4f3] border border-[#f0dedd] p-3 text-sm text-[#8a2e2e]" role="alert"><AlertCircle size={16} className="shrink-0 mt-0.5" />{error}</p>}
+      {error && <p className="mb-6 flex gap-2 rounded-xl bg-danger-soft border border-danger-line p-3 text-sm text-danger" role="alert"><AlertCircle size={16} className="shrink-0 mt-0.5" />{error}</p>}
       {!data && !error && <p className="text-sm text-ink-soft">Loading…</p>}
 
       {s && (
@@ -153,7 +153,7 @@ function Dashboard({ onLogout }) {
                 {s.funnel.map((f) => (
                   <li key={f.stage} className="flex items-center justify-between gap-4 text-sm border-b border-sage-light/60 pb-2 last:border-0">
                     <span className="text-ink">{f.stage}</span>
-                    <span className="font-semibold text-[#004647] tabular-nums">
+                    <span className="font-semibold text-jade-deep tabular-nums">
                       {f.count == null ? "Not available" : f.count}
                       {f.pct_of_previous != null && <span className="ml-2 text-xs font-normal text-ink-soft">({f.pct_of_previous}%)</span>}
                     </span>
@@ -213,7 +213,7 @@ export default function AdminApp() {
     <div className="min-h-dvh flex flex-col bg-cream">
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-sage-light">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <a href="/" aria-label="YuriWoori skin analysis"><ProvidedLogo height={40} /></a>
+          <a href="/" aria-label="YuriWoori skin analysis"><OfficialLogo height={40} /></a>
           <span className="text-[11px] uppercase tracking-wider font-semibold text-ink-soft">Admin</span>
           {authed ? <button onClick={logout} className="flex items-center gap-1.5 text-xs font-semibold text-jade"><LogOut size={14} /> Log out</button> : <span className="w-16" />}
         </div>

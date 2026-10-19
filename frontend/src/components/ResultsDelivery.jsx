@@ -11,9 +11,9 @@ import { deliveryView, shouldPoll } from "../services/reportView";
 
 const ICONS = { email: Mail, whatsapp: MessageCircle };
 const BTN = "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-pill px-5 text-[13px] font-semibold tracking-wide transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade disabled:opacity-60";
-const PRIMARY = `${BTN} bg-jade text-cream hover:bg-[#004647]`;
+const PRIMARY = `${BTN} bg-jade text-cream hover:bg-jade-deep`;
 const SECONDARY = `${BTN} border border-jade-line bg-white text-jade hover:bg-mist`;
-const TONE = { sent: "text-[#004647]", delivered: "text-[#004647]", failed: "text-[#9a3b35]", unavailable: "text-ink-soft", ask: "text-ink", pending: "text-ink" };
+const TONE = { sent: "text-jade-deep", delivered: "text-jade-deep", failed: "text-danger-strong", unavailable: "text-ink-soft", ask: "text-ink", pending: "text-ink" };
 
 function Channel({ info, scanId, onChange, onRecheck }) {
   const view = deliveryView(info);
@@ -33,7 +33,7 @@ function Channel({ info, scanId, onChange, onRecheck }) {
 
   return (
     <li className="rounded-2xl border border-hairline bg-white p-4">
-      <p className="flex items-center gap-2 text-[14px] font-semibold text-[#004647]">
+      <p className="flex items-center gap-2 text-[14px] font-semibold text-jade-deep">
         <Icon size={16} className="text-jade" aria-hidden="true" />{CHANNEL_LABELS[info.channel]}
         {info.destination && <span className="font-normal text-ink-soft">· {info.destination}</span>}
       </p>
@@ -77,7 +77,7 @@ function Channel({ info, scanId, onChange, onRecheck }) {
           Check again
         </button>
       )}
-      {error && <p className="mt-2 text-[13px] text-[#9a3b35]" role="alert">{error}</p>}
+      {error && <p className="mt-2 text-[13px] text-danger-strong" role="alert">{error}</p>}
     </li>
   );
 }
@@ -114,14 +114,14 @@ export function ResultsDelivery({ scanId }) {
   return (
     <section aria-labelledby="report-title" className={`${CARD} mx-auto mb-10 max-w-3xl p-6 sm:p-8`}>
       <Kicker>Keep your results</Kicker>
-      <h2 id="report-title" className="mt-1 font-display text-[26px] leading-tight text-[#004647]">Your skin-analysis report</h2>
+      <h2 id="report-title" className="mt-1 font-display text-[26px] leading-tight text-jade-deep">Your skin-analysis report</h2>
       <p className="mt-3 text-[14px] leading-relaxed text-ink-soft">
         Your measured results, what we noticed, your morning and evening routine, and your products with current prices and any store discounts — as a PDF, by email and on WhatsApp.
       </p>
 
       {state === "loading" && <p className="mt-4 flex items-center gap-2 text-[13px] text-ink-soft"><Loader2 size={15} className="animate-spin" aria-hidden="true" />Preparing your report…</p>}
       {state === "error" && (
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-[13px] text-[#9a3b35]" role="alert">
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-[13px] text-danger-strong" role="alert">
           <AlertCircle size={15} aria-hidden="true" />Your report couldn't be prepared right now.
           <button type="button" onClick={() => { setState("loading"); load(); }} className={SECONDARY}><RotateCcw size={14} aria-hidden="true" />Try again</button>
         </div>
@@ -135,7 +135,7 @@ export function ResultsDelivery({ scanId }) {
             </button>
             {report.revoked && <span className="text-[13px] text-ink-soft">The link to this report was withdrawn.</span>}
           </div>
-          {pdfError && <p className="mt-2 text-[13px] text-[#9a3b35]" role="alert">{pdfError}</p>}
+          {pdfError && <p className="mt-2 text-[13px] text-danger-strong" role="alert">{pdfError}</p>}
           {!report.revoked && (
             <ul className="mt-4 grid gap-3">
               {report.deliveries.map((d) => <Channel key={d.channel} info={d} scanId={scanId} onChange={refresh} onRecheck={load} />)}

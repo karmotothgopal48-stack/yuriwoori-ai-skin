@@ -41,7 +41,7 @@ function PrepVisual() {
           </linearGradient>
           <linearGradient id="prep-hair" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#528778" stopOpacity="0.55" />
-            <stop offset="1" stopColor="#004647" stopOpacity="0.75" />
+            <stop offset="1" stopColor="#004E4D" stopOpacity="0.75" />
           </linearGradient>
         </defs>
         {/* shoulders + neck */}
@@ -51,8 +51,8 @@ function PrepVisual() {
         {/* hair, tied back */}
         <path d="M128 86 C124 52 146 38 162 40 C184 41 196 58 192 86 C190 70 180 58 160 58 C142 58 132 70 128 86 Z" fill="url(#prep-hair)" />
         {/* guide oval (same shape language as the camera screen) */}
-        <ellipse cx="160" cy="86" rx="46" ry="58" fill="none" stroke="#005C5D" strokeOpacity="0.55" strokeWidth="1.2" strokeDasharray="3 5" />
-        <g stroke="#005C5D" strokeOpacity="0.5" strokeWidth="1.6" fill="none" strokeLinecap="round">
+        <ellipse cx="160" cy="86" rx="46" ry="58" fill="none" stroke="#006968" strokeOpacity="0.55" strokeWidth="1.2" strokeDasharray="3 5" />
+        <g stroke="#006968" strokeOpacity="0.5" strokeWidth="1.6" fill="none" strokeLinecap="round">
           <path d="M104 30 q-8 0 -8 8" /><path d="M216 30 q8 0 8 8" /><path d="M96 134 q0 8 8 8" /><path d="M224 134 q0 8 -8 8" />
         </g>
         {/* a few quiet analysis points (forehead, cheeks, chin) */}
@@ -74,8 +74,8 @@ export default function Tips({ go }) {
   return (
     <div className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 sm:py-8 flex flex-col">
       <div className="flex flex-col items-center text-center mb-8">
-        <Eyebrow className="mb-2 text-jade tracking-[0.14em]">Step 2 &middot; Tips</Eyebrow>
-        <h2 className="font-display text-3xl sm:text-4xl text-[#004647] mb-5">How to get the best scan</h2>
+        <Eyebrow className="mb-2 text-jade tracking-[0.14em]">Tips</Eyebrow>
+        <h2 className="font-display text-3xl sm:text-4xl text-jade-deep mb-5">How to get the best scan</h2>
         
         <PrepVisual />
       </div>
@@ -96,7 +96,7 @@ export default function Tips({ go }) {
               <t.icon size={18} className="text-jade" strokeWidth={1.5} aria-hidden="true" />
             </div>
             <div>
-              <h3 className="font-semibold text-[#004647] mb-1 text-[15px]" style={{ fontFamily: "var(--font-sans)", letterSpacing: "normal" }}>{t.t}</h3>
+              <h3 className="font-semibold text-jade-deep mb-1 text-[15px]" style={{ fontFamily: "var(--font-sans)", letterSpacing: "normal" }}>{t.t}</h3>
               <p className="text-[13px] leading-relaxed text-ink-soft">{t.b}</p>
             </div>
           </motion.div>

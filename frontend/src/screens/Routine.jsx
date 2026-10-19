@@ -25,7 +25,7 @@ import { whatsappProductLink } from "../services/whatsapp";
 
 // relationship_type values from the backend (IngredientInteractionType)
 const INTERACTION = {
-  synergistic: { title: "Work well together", cls: "bg-mist/60 border-jade-line/60", tone: "text-[#004647]" },
+  synergistic: { title: "Work well together", cls: "bg-mist/60 border-jade-line/60", tone: "text-jade-deep" },
   caution: { title: "Use with care together", cls: "bg-[#faf3f0] border-[#ecd9d2]", tone: "text-[#7d4f45]" },
   avoid_same_routine: { title: "Avoid in the same routine", cls: "bg-[#faf3f0] border-[#ecd9d2]", tone: "text-[#7d4f45]" },
 };
@@ -50,7 +50,7 @@ function ProductCopy({ benefits, keyBenefit, ingredients }) {
         <div className={ROW}><dt className="font-semibold text-ink">Ingredients</dt>
           <dd className="text-ink-soft">
             <details>
-              <summary className="cursor-pointer text-jade hover:text-[#004647]">Full ingredient list ({ingredients.length})</summary>
+              <summary className="cursor-pointer text-jade hover:text-jade-deep">Full ingredient list ({ingredients.length})</summary>
               <p className="mt-1.5 text-[12px] leading-relaxed">{ingredients.join(", ")}</p>
             </details>
           </dd>
@@ -66,6 +66,9 @@ const asOf = (iso) => {
   return d && !Number.isNaN(d.getTime()) ? d.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }) : "an earlier check";
 };
 
+// Secondary actions on a product card: outlined pills, quieter than the filled Add to cart beside them
+const LINK_PILL = "inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-jade-line bg-white px-4 text-[13px] font-semibold text-jade transition-colors hover:border-jade hover:bg-mist/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade";
+
 /** One product: live image, name and price (original price and discount when the store has them), how and
     why, Add to cart / quantity, a link to the official product page, and a WhatsApp enquiry about it. */
 function ProductCard({ item, live, liveStatus, storeUrl, eyebrow, details, onOpen }) {
@@ -76,11 +79,11 @@ function ProductCard({ item, live, liveStatus, storeUrl, eyebrow, details, onOpe
   return (
     <article className={`${CARD} mb-5 p-4 sm:p-5`}>
       <div className="flex items-start gap-4">
-        <ProductImage product={{ name, image: live?.image_url ?? item.image }} bg="bg-white"
-          className="h-24 w-24 shrink-0 rounded-2xl border border-hairline sm:h-28 sm:w-28 [&_img]:mix-blend-multiply" />
+        <ProductImage product={{ name, image: live?.image_url ?? item.image }} bg="bg-white" size={144}
+          className="h-28 w-28 shrink-0 rounded-2xl border border-hairline sm:h-36 sm:w-36 [&_img]:mix-blend-multiply" />
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sage">{eyebrow}</p>
-          <h3 className="mt-1 font-display text-[19px] leading-snug text-[#004647]">{name}</h3>
+          <h3 className="mt-1 font-display text-[19px] leading-snug text-jade-deep">{name}</h3>
           <div className="mt-1.5">
             {live
               ? <Price price={live.price} compareAt={live.compare_at_price} discount={live.discount_percent} />
@@ -93,17 +96,15 @@ function ProductCard({ item, live, liveStatus, storeUrl, eyebrow, details, onOpe
       {details}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <AddToCart product={live} storeUrl={storeUrl} />
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+        <div className="flex flex-wrap items-center gap-2">
           {whatsapp && (
-            <a href={whatsapp} target="_blank" rel="noreferrer" aria-label={`Ask on WhatsApp about ${name}`}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-sm text-[12px] font-semibold uppercase tracking-[0.12em] text-jade hover:text-[#004647] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade">
-              <span aria-hidden="true">💬</span> Ask on WhatsApp
+            <a href={whatsapp} target="_blank" rel="noreferrer" aria-label={`Ask on WhatsApp about ${name}`} className={LINK_PILL}>
+              <MessageCircle size={15} aria-hidden="true" /> Ask on WhatsApp
             </a>
           )}
           {productUrl && (
-            <a href={productUrl} target="_blank" rel="noreferrer" onClick={() => onOpen?.(item)}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-sm text-[12px] font-semibold uppercase tracking-[0.12em] text-jade hover:text-[#004647] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade">
-              Product details <ExternalLink size={13} aria-hidden="true" />
+            <a href={productUrl} target="_blank" rel="noreferrer" onClick={() => onOpen?.(item)} className={LINK_PILL}>
+              Product details <ExternalLink size={14} aria-hidden="true" />
             </a>
           )}
         </div>
@@ -121,14 +122,14 @@ function RitualStep({ entry, n, last, hideMatch, liveData, onOpen, tags }) {
     <motion.li variants={fadeUp} className="relative grid grid-cols-[auto_1fr] gap-4 sm:gap-5">
       {/* number + connector */}
       <div className="flex flex-col items-center">
-        <span className="flex h-11 w-11 items-center justify-center rounded-full border border-jade-line bg-white font-display text-lg text-[#004647]">{String(n).padStart(2, "0")}</span>
+        <span className="flex h-11 w-11 items-center justify-center rounded-full border border-jade-line bg-white font-display text-lg text-jade-deep">{String(n).padStart(2, "0")}</span>
         {!last && <span aria-hidden="true" className="mt-2 w-px flex-1 bg-sage-light" />}
       </div>
       <ProductCard item={s} live={live} liveStatus={liveData.status} storeUrl={liveData.storeUrl} onOpen={onOpen}
         eyebrow={`Step ${String(n).padStart(2, "0")}${s.step ? ` · ${s.step}` : ""} · ${entry.when}`}
         details={(
           <dl className="mt-4 grid gap-2.5 text-[13px] leading-relaxed">
-            <div className={ROW}><dt className="font-semibold text-ink">When</dt><dd className="font-medium text-[#004647]">{entry.when}</dd></div>
+            <div className={ROW}><dt className="font-semibold text-ink">When</dt><dd className="font-medium text-jade-deep">{entry.when}</dd></div>
             <div className={ROW}><dt className="font-semibold text-ink">How</dt><dd className="text-ink-soft">{s.howToUse ?? "The catalogue has no usage instructions for this product."}</dd></div>
             <ProductCopy benefits={s.benefits} keyBenefit={s.keyBenefit} ingredients={s.ingredients} />
             <div className={ROW}><dt className="font-semibold text-ink">Why</dt><dd className="text-ink-soft">{hideMatch ? why : [why, match].filter(Boolean).join(" ")}</dd></div>
@@ -149,7 +150,7 @@ function DailyRoutine({ entries, hideMatch, liveData, onOpen, tagsFor }) {
           {allBoth ? <Sun size={18} className="text-jade" strokeWidth={1.6} aria-hidden="true" /> : <Moon size={18} className="text-jade" strokeWidth={1.6} aria-hidden="true" />}
         </span>
         <div>
-          <p id="daily-title" className="font-display text-2xl leading-none text-[#004647]">{allBoth ? "Morning & evening" : "Your daily steps"}</p>
+          <p id="daily-title" className="font-display text-2xl leading-none text-jade-deep">{allBoth ? "Morning & evening" : "Your daily steps"}</p>
           <p className="mt-1 text-[12px] text-ink-soft">
             {entries.length} product{entries.length === 1 ? "" : "s"}{allBoth ? ", each used morning and evening" : " · each step shows when to use it"}
           </p>
@@ -187,23 +188,23 @@ function RoutinePrice({ entries, liveData }) {
   const state = priceState({ shopify: q, quoteStatus: quote.key === key ? quote.status : "loading", pricesConfirmed: !liveData.stale });
   return (
     <section aria-labelledby="routine-price-title" className={`${CARD} mx-auto mb-10 max-w-3xl p-6`}>
-      <h2 id="routine-price-title" className="font-display text-2xl text-[#004647]">Your routine price</h2>
+      <h2 id="routine-price-title" className="font-display text-2xl text-jade-deep">Your routine price</h2>
       <p className="mt-1 text-[12px] text-ink-soft">All {lines.length} routine products, one of each, priced by yuriwoori.com (Shopify) for this cart.</p>
       {state === "shopify" ? (
         <>
           <dl className="mt-4 grid gap-1.5 text-[14px]" aria-live="polite">
             <div className="flex justify-between text-ink-soft"><dt>Products subtotal</dt><dd className="tabular-nums">{formatPrice(q.subtotal)}</dd></div>
             {q.discounts.map((d) => (
-              <div key={`${d.kind}-${d.title}`} className="flex justify-between text-[#004647]"><dt>{discountLabel(d)}</dt><dd className="tabular-nums">−{formatPrice(d.amount)}</dd></div>
+              <div key={`${d.kind}-${d.title}`} className="flex justify-between text-jade-deep"><dt>{discountLabel(d)}</dt><dd className="tabular-nums">−{formatPrice(d.amount)}</dd></div>
             ))}
             <div className="flex justify-between text-ink-soft"><dt>Shipping &amp; taxes</dt><dd className="text-[12px]">{SHIPPING_TAXES_NOTE}</dd></div>
             <div className="mt-1 flex items-baseline justify-between border-t border-sage-light pt-2">
               <dt className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-soft">Total payable (before shipping)</dt>
-              <dd className="font-display text-[24px] text-[#004647] tabular-nums">{formatPrice(q.total)}</dd>
+              <dd className="font-display text-[24px] text-jade-deep tabular-nums">{formatPrice(q.total)}</dd>
             </div>
           </dl>
           <p className="mt-2 text-[12px] leading-relaxed text-ink-soft">{discountNote(q.discounts)} Shipping is added at checkout.</p>
-          {hint && <p className="mt-2 rounded-xl bg-mist/60 px-3 py-2 text-[12px] leading-relaxed text-[#004647]">{hint}</p>}
+          {hint && <p className="mt-2 rounded-xl bg-mist/60 px-3 py-2 text-[12px] leading-relaxed text-jade-deep">{hint}</p>}
         </>
       ) : state === "unavailable" ? (
         <p className="mt-4 text-[14px] leading-relaxed text-ink" role="status"><span className="font-semibold">{FINAL_PRICE_UNAVAILABLE}</span>{" "}
@@ -231,7 +232,7 @@ function OptionalExtras({ extras, liveData, onOpen, tagsFor }) {
       <div className="mb-5 flex items-center gap-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-full border border-jade-line bg-white"><Sparkles size={18} className="text-jade" strokeWidth={1.6} aria-hidden="true" /></span>
         <div>
-          <p id="extras-title" className="font-display text-2xl leading-none text-[#004647]">Optional extras</p>
+          <p id="extras-title" className="font-display text-2xl leading-none text-jade-deep">Optional extras</p>
           <p className="mt-1 text-[12px] text-ink-soft">Matched to your scan, outside the daily steps</p>
         </div>
       </div>
@@ -263,7 +264,7 @@ function OptionalExtras({ extras, liveData, onOpen, tagsFor }) {
 // One message per failure kind (routinePlan.routineState). None of them is ever shown as "balanced".
 const ERROR_COPY = {
   "matching-error": { title: "We couldn't find matching YuriWoori products for this result.", body: "Your skin analysis is complete, but no matching YuriWoori products came back for it. Please retry, or scan again." },
-  "server-error": { title: "We couldn't load your personalized routine right now.", body: "The YuriWoori server didn't respond. Your skin analysis is saved; please retry." },
+  "server-error": { title: "We couldn't load your personalised routine right now.", body: "The YuriWoori server didn't respond. Your skin analysis is saved; please retry." },
   "data-error": { title: "We received an incomplete routine result.", body: "Please try again. If this keeps happening, scan again." },
 };
 
@@ -271,8 +272,8 @@ const ERROR_COPY = {
 function RoutineError({ kind, onRetry, retrying, retryFailed, go }) {
   const copy = ERROR_COPY[kind] ?? ERROR_COPY["data-error"];
   return (
-    <div className="mx-auto mb-10 max-w-2xl rounded-[24px] border border-[#f0dedd] bg-[#fcf4f3] p-6 text-center sm:p-8" role="alert">
-      <AlertCircle size={32} className="mx-auto mb-3 text-[#8a2e2e]" strokeWidth={1.5} aria-hidden="true" />
+    <div className="mx-auto mb-10 max-w-2xl rounded-[24px] border border-danger-line bg-danger-soft p-6 text-center sm:p-8" role="alert">
+      <AlertCircle size={32} className="mx-auto mb-3 text-danger" strokeWidth={1.5} aria-hidden="true" />
       <h3 className="mb-2 font-display text-2xl text-ink">{copy.title}</h3>
       <p className="text-sm leading-relaxed text-ink-soft">{copy.body}{retryFailed ? " The last attempt didn't succeed either." : ""}</p>
       <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
@@ -350,7 +351,7 @@ export default function Routine({ go, analysis, setAnalysis }) {
         {[{ t: "Morning", i: Sun, n: shown.AM.length }, { t: "Evening", i: Moon, n: shown.PM.length }].map((x) => (
           <li key={x.t} className={`${SOFT} p-4`}>
             <x.i size={18} className="text-jade" strokeWidth={1.6} aria-hidden="true" />
-            <p className="mt-2 font-display text-3xl leading-none text-[#004647] tabular-nums">{x.n}</p>
+            <p className="mt-2 font-display text-3xl leading-none text-jade-deep tabular-nums">{x.n}</p>
             <p className="mt-1 text-[12px] text-ink-soft">{x.t} step{x.n === 1 ? "" : "s"}</p>
           </li>
         ))}
@@ -361,9 +362,9 @@ export default function Routine({ go, analysis, setAnalysis }) {
 
   return (
     <div className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-10">
-      <ResultHero eyebrow="Personalized routine" title="Your daily YuriWoori ritual." aside={overview || undefined}>
+      <ResultHero eyebrow="Personalised routine" title="Your daily YuriWoori ritual." aside={overview || undefined}>
         <p>What to use, when, and in what order. For each step — cleanse, tone, treat, moisturize, and protect in the morning only — the YuriWoori product that best matches your scan is chosen; steps with no match are left out.</p>
-        {state === "ready" && sharedMatch && <p className="mt-3 text-[13px] font-medium text-[#004647]">{sharedMatch}</p>}
+        {state === "ready" && sharedMatch && <p className="mt-3 text-[13px] font-medium text-jade-deep">{sharedMatch}</p>}
       </ResultHero>
 
       {state.endsWith("-error") && (

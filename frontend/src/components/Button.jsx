@@ -2,9 +2,9 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const VARIANTS = {
-  primary: "bg-jade text-cream hover:bg-[#004647] hover:shadow-bloom disabled:bg-jade-line disabled:hover:shadow-none focus-visible:ring-2 focus-visible:ring-jade focus-visible:ring-offset-2 focus-visible:ring-offset-cream border border-transparent",
+  primary: "bg-jade text-cream hover:bg-jade-deep hover:shadow-bloom disabled:bg-jade-line disabled:hover:shadow-none focus-visible:ring-2 focus-visible:ring-jade focus-visible:ring-offset-2 focus-visible:ring-offset-cream border border-transparent",
   secondary: "border border-jade text-jade hover:bg-mist focus-visible:ring-2 focus-visible:ring-jade focus-visible:ring-offset-2 focus-visible:ring-offset-cream",
-  tertiary: "text-jade hover:text-[#004647] bg-transparent group focus-visible:ring-2 focus-visible:ring-jade focus-visible:ring-offset-2 focus-visible:ring-offset-cream rounded-sm px-2 py-1",
+  tertiary: "text-jade hover:text-jade-deep bg-transparent group focus-visible:ring-2 focus-visible:ring-jade focus-visible:ring-offset-2 focus-visible:ring-offset-cream rounded-sm px-2 py-1",
   ghost: "bg-mist text-jade hover:bg-aqua focus-visible:ring-2 focus-visible:ring-jade focus-visible:ring-offset-2",
 };
 

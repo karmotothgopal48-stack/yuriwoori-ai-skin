@@ -28,12 +28,12 @@ const ERROR_HELP = {
 
 function StageRow({ stage, state }) {
   const Icon = state === "done" ? CircleCheck : state === "active" ? Loader2 : state === "failed" ? AlertCircle : CircleDashed;
-  const tone = state === "done" ? "text-jade" : state === "active" ? "text-jade" : state === "failed" ? "text-[#8a2e2e]" : "text-ink-soft/40";
+  const tone = state === "done" ? "text-jade" : state === "active" ? "text-jade" : state === "failed" ? "text-danger" : "text-ink-soft/40";
   return (
     <li className="flex items-start gap-3 text-left">
       <Icon size={18} className={`${tone} shrink-0 mt-0.5 ${state === "active" ? "animate-spin" : ""}`} strokeWidth={2} />
       <div>
-        <p className={`text-sm font-medium ${state === "pending" ? "text-ink-soft/60" : "text-[#004647]"}`}>{stage.label}</p>
+        <p className={`text-sm font-medium ${state === "pending" ? "text-ink-soft/60" : "text-jade-deep"}`}>{stage.label}</p>
       </div>
     </li>
   );
@@ -56,7 +56,7 @@ function AnalysisVisual({ photo, running }) {
         <circle cx="100" cy="100" r="88" fill="none" stroke="#BDDCCD" strokeWidth="0.8" />
         <motion.g style={{ transformOrigin: "100px 100px" }} animate={running ? { rotate: 360 } : {}} transition={{ duration: 24, repeat: Infinity, ease: "linear" }}>
           <circle cx="100" cy="100" r="76" fill="none" stroke="#528778" strokeOpacity="0.45" strokeWidth="0.8" strokeDasharray="1.5 6" />
-          <circle cx="100" cy="24" r="2.4" fill="#005C5D" />
+          <circle cx="100" cy="24" r="2.4" fill="#006968" />
           <circle cx="176" cy="100" r="1.8" fill="#9DD4CA" />
         </motion.g>
         <motion.g style={{ transformOrigin: "100px 100px" }} animate={running ? { rotate: -360 } : {}} transition={{ duration: 36, repeat: Infinity, ease: "linear" }}>
@@ -122,8 +122,8 @@ export default function Processing({ go, photo, setPhoto, bodyPart, setAnalysis,
 
   return (
     <div className="flex-1 w-full max-w-4xl mx-auto flex flex-col items-center justify-center px-4 py-6 sm:py-8 text-center">
-      <Eyebrow className="mb-2 text-jade tracking-[0.14em]">Step 5 &middot; Skin analysis</Eyebrow>
-      <h2 className="font-display text-3xl text-[#004647] mb-5">{error ? "Let's try that again" : stage === "done" ? "Your skin profile is ready" : "Analysing your skin"}</h2>
+      <Eyebrow className="mb-2 text-jade tracking-[0.14em]">Skin analysis</Eyebrow>
+      <h2 className="font-display text-3xl text-jade-deep mb-5">{error ? "Let's try that again" : stage === "done" ? "Your skin profile is ready" : "Analysing your skin"}</h2>
 
       <div className="grid w-full grid-cols-1 md:grid-cols-2 items-center gap-2 md:gap-10">
         <AnalysisVisual photo={photo} running={!error && stage !== "done"} />
@@ -136,8 +136,8 @@ export default function Processing({ go, photo, setPhoto, bodyPart, setAnalysis,
 
       {error && (
         <div className="w-full">
-          <div className="rounded-card bg-[#fcf4f3] border border-[#f0dedd] p-5 mb-5 text-left">
-            <p className="font-display text-xl text-[#8a2e2e] mb-1">{help.title}</p>
+          <div className="rounded-card bg-danger-soft border border-danger-line p-5 mb-5 text-left">
+            <p className="font-display text-xl text-danger mb-1">{help.title}</p>
             <p className="text-sm leading-relaxed text-ink-soft">{error.message}</p>
           </div>
           <div className="flex flex-col w-full gap-3">

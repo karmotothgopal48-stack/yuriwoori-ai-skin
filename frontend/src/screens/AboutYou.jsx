@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Camera, Sparkles, Sun } from "lucide-react";
 import { Button, Eyebrow } from "../components/Button";
-import { FullLockup } from "../components/Logo";
 import { ProductImage } from "../components/ProductCard";
 import { useShowcaseProducts } from "../services/showcase";
 
@@ -51,10 +50,8 @@ export default function AboutYou({ go, about, setAbout }) {
       </div>
 
       <header className="relative flex flex-col items-center text-center w-full max-w-3xl">
-        {/* Official transparent lockup; the negative margin offsets the file's transparent bottom padding (~17%). */}
-        <FullLockup className="h-[64px] sm:h-[88px] -mb-2.5 sm:-mb-3" />
-        <Eyebrow className="mt-2 mb-1.5 text-jade">Welcome to YuriWoori</Eyebrow>
-        <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.15] text-[#004647]">Start Your Personalised Skin Analysis</h1>
+        <Eyebrow className="mb-1.5 text-jade">Welcome to YuriWoori</Eyebrow>
+        <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.15] text-jade-deep">Start Your Personalised Skin Analysis</h1>
         <p className="mt-2 text-sm sm:text-[15px] leading-relaxed text-ink-soft max-w-3xl text-balance sm:text-wrap">
           Tell us a little about yourself to personalise your skin analysis and recommendations.
         </p>
@@ -75,7 +72,7 @@ export default function AboutYou({ go, about, setAbout }) {
                 <label key={g.value} className="cursor-pointer">
                   <input type="radio" name="gender" value={g.value} checked={gender === g.value} required
                     onChange={() => setGender(g.value)} className="peer sr-only" />
-                  <span className="flex h-full min-h-12 items-center justify-center rounded-xl border border-sage-light bg-white px-2 py-2.5 text-center text-[14px] leading-tight text-ink transition-[border-color,background-color,box-shadow] hover:border-sage peer-checked:border-jade peer-checked:bg-mist peer-checked:font-semibold peer-checked:text-[#004647] peer-checked:ring-1 peer-checked:ring-jade peer-focus-visible:ring-4 peer-focus-visible:ring-jade/15">
+                  <span className="flex h-full min-h-12 items-center justify-center rounded-xl border border-sage-light bg-white px-2 py-2.5 text-center text-[14px] leading-tight text-ink transition-[border-color,background-color,box-shadow] hover:border-sage peer-checked:border-jade peer-checked:bg-mist peer-checked:font-semibold peer-checked:text-jade-deep peer-checked:ring-1 peer-checked:ring-jade peer-focus-visible:ring-4 peer-focus-visible:ring-jade/15">
                     {g.label}
                   </span>
                 </label>
@@ -99,7 +96,7 @@ export default function AboutYou({ go, about, setAbout }) {
               />
               <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[13px] text-ink-soft">years</span>
             </div>
-            {ageTouched && ageError && <p id="entry-age-error" className="text-[13px] text-[#9a3b35]">{ageError}</p>}
+            {ageTouched && ageError && <p id="entry-age-error" className="text-[13px] text-danger-strong">{ageError}</p>}
           </div>
 
           <Button type="submit" full disabled={!valid} icon={null} className="mt-1 text-[15px]">
@@ -123,7 +120,7 @@ export default function AboutYou({ go, about, setAbout }) {
           <ul className="grid w-full grid-cols-3 gap-3 sm:gap-4">
             {products.map((p) => (
               <li key={p.id} className="flex flex-col items-center gap-2">
-                <ProductImage product={p} bg="bg-white" className="aspect-square w-full max-w-[140px] rounded-2xl border border-hairline" />
+                <ProductImage product={p} bg="bg-white" size={140} className="aspect-square w-full max-w-[140px] rounded-2xl border border-hairline" />
                 <span className="text-[11px] leading-snug text-center text-ink-soft line-clamp-3 max-w-[150px]">{p.name.replace(/^Yuri Woori /, "")}</span>
               </li>
             ))}

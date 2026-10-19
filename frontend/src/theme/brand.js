@@ -1,10 +1,10 @@
 // YuriWoori Brand Book v1.2 tokens (for SVG / inline styles; CSS uses @theme in index.css)
 export const BRAND = {
-  deepJade: "#005C5D",
+  deepJade: "#006968",
   softJade: "#9DD4CA",
   jadeLine: "#BDDCCD",
   mist: "#E3ECEB",
-  sage: "#528778",
+  sage: "#47705F",
   cream: "#F1F5EB",
   aqua: "#D5EEE7",
   white: "#FFFFFF",

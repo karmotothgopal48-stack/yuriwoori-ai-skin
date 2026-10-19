@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { AlertCircle } from "lucide-react";
 import { Button, Eyebrow } from "../components/Button";
-import { FullLockup } from "../components/Logo";
 import { ProductImage } from "../components/ProductCard";
 import { PrivacyPolicyModal } from "../components/PrivacyPolicyModal";
 import { useShowcaseProducts } from "../services/showcase";
@@ -32,7 +31,7 @@ function Field({ id, label, error, hint, ...input }) {
         {...input}
       />
       {hint && <p id={`${id}-hint`} className="text-[12px] leading-relaxed text-ink-soft">{hint}</p>}
-      {error && <p id={`${id}-error`} className="text-[13px] text-[#9a3b35]">{error}</p>}
+      {error && <p id={`${id}-error`} className="text-[13px] text-danger-strong">{error}</p>}
     </div>
   );
 }
@@ -106,11 +105,8 @@ export default function Signup({ setUser }) {
       </div>
 
       <header className="relative flex flex-col items-center text-center w-full max-w-3xl">
-        {/* Official transparent lockup (the client-supplied file has a white box, for white surfaces only).
-            The negative margin offsets the file's transparent bottom padding (~17%). */}
-        <FullLockup className="h-[64px] sm:h-[88px] -mb-2.5 sm:-mb-3" />
-        <Eyebrow className="mt-2 mb-1.5 text-jade">Before we begin</Eyebrow>
-        <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.15] text-[#004647]">Your Skin Analysis</h1>
+        <Eyebrow className="mb-1.5 text-jade">Before we begin</Eyebrow>
+        <h1 className="font-display text-[25px] sm:text-[32px] leading-[1.15] text-jade-deep">Your Skin Analysis</h1>
         <p className="mt-2 text-sm sm:text-[15px] leading-relaxed text-ink-soft max-w-3xl text-balance sm:text-wrap">
           Enter your details so we can save your skin analysis, your results and your personalised product recommendations.
         </p>
@@ -137,7 +133,7 @@ export default function Signup({ setUser }) {
             <input
               id="entry-consent" type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)}
               aria-describedby={touched.name && touched.whatsapp && touched.email && !consent ? "entry-consent-error" : undefined}
-              className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#005C5D] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade"
+              className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-jade focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade"
             />
             <span className="text-[13px] leading-relaxed text-ink">
               I agree to the{" "}
@@ -151,7 +147,7 @@ export default function Signup({ setUser }) {
 
           <label htmlFor="entry-report-consent" className="flex items-start gap-3 cursor-pointer rounded-xl bg-cream/70 border border-hairline px-3.5 py-3">
             <input id="entry-report-consent" type="checkbox" checked={reportConsent} onChange={(e) => setReportConsent(e.target.checked)}
-              className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[#005C5D] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade" />
+              className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-jade focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-jade" />
             <span className="text-[13px] leading-relaxed text-ink">
               Send my skin-analysis report (with my results and personalised recommendations) to my email and WhatsApp number. <span className="text-ink-soft">Optional — you can also choose this after your analysis.</span>
             </span>
@@ -170,11 +166,11 @@ export default function Signup({ setUser }) {
           )}
 
           {touched.name && touched.whatsapp && touched.email && !consent && (
-            <p id="entry-consent-error" className="-mt-1 text-[13px] text-[#9a3b35]">Please accept the Privacy Policy to continue.</p>
+            <p id="entry-consent-error" className="-mt-1 text-[13px] text-danger-strong">Please accept the Privacy Policy to continue.</p>
           )}
 
           {error && (
-            <p className="flex items-start gap-2 rounded-xl bg-[#fcf4f3] border border-[#f0dedd] p-3 text-sm text-[#8a2e2e]" role="alert">
+            <p className="flex items-start gap-2 rounded-xl bg-danger-soft border border-danger-line p-3 text-sm text-danger" role="alert">
               <AlertCircle size={16} className="shrink-0 mt-0.5" /> {error}
             </p>
           )}
@@ -192,7 +188,7 @@ export default function Signup({ setUser }) {
           <ul className="grid w-full grid-cols-3 gap-3 sm:gap-4">
             {products.map((p) => (
               <li key={p.id} className="flex flex-col items-center gap-2">
-                <ProductImage product={p} bg="bg-white" className="aspect-square w-full max-w-[140px] rounded-2xl border border-hairline" />
+                <ProductImage product={p} bg="bg-white" size={140} className="aspect-square w-full max-w-[140px] rounded-2xl border border-hairline" />
                 <span className="text-[11px] leading-snug text-center text-ink-soft line-clamp-3 max-w-[150px]">{p.name.replace(/^Yuri Woori /, "")}</span>
               </li>
             ))}

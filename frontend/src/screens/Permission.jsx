@@ -51,8 +51,8 @@ export default function Permission({ go }) {
         </div>
 
         <div className="w-full max-w-md mx-auto md:mx-0">
-          <Eyebrow className="text-jade tracking-[0.14em]">Step 1 &middot; Permission</Eyebrow>
-          <h1 className="mt-2 font-display text-[32px] sm:text-[40px] leading-[1.1] text-[#004647]">
+          <Eyebrow className="text-jade tracking-[0.14em]">Permission</Eyebrow>
+          <h1 className="mt-2 font-display text-[32px] sm:text-[40px] leading-[1.1] text-jade-deep">
             Let&apos;s understand <br className="hidden md:block" />your skin
           </h1>
           <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
@@ -67,7 +67,7 @@ export default function Permission({ go }) {
           {error && (
             <motion.p
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} role="alert"
-              className="mt-5 flex items-start gap-2.5 rounded-card bg-[#fcf4f3] p-4 text-sm text-[#8a2e2e] border border-[#f0dedd]"
+              className="mt-5 flex items-start gap-2.5 rounded-card bg-danger-soft p-4 text-sm text-danger border border-danger-line"
             >
               <AlertCircle size={18} className="shrink-0 mt-0.5" />
               <span>{error}</span>

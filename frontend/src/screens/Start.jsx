@@ -22,7 +22,7 @@ export default function Start({ go, user, signOut, serverUnreachable = false }) 
         <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 px-5 pt-5 pb-8 sm:px-10 sm:py-8 md:grid-cols-[1.1fr_0.9fr] md:gap-12 md:py-10">
           <div className="text-center md:text-left">
             <Eyebrow className="text-jade">AI Skin Analysis</Eyebrow>
-            <h1 className="mt-2 font-display text-[30px] leading-[1.08] text-[#004647] sm:text-[44px] lg:text-[52px]">
+            <h1 className="mt-2 font-display text-[30px] leading-[1.08] text-jade-deep sm:text-[44px] lg:text-[52px]">
               See what one selfie says <br className="hidden md:block" />about your skin.
             </h1>
             <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-ink-soft md:mx-0">
@@ -37,7 +37,7 @@ export default function Start({ go, user, signOut, serverUnreachable = false }) 
 
             {/* Start waits until a saved session has been checked; say why instead of a silently disabled button */}
             {user === undefined && (
-              <p className={`mt-4 text-xs ${serverUnreachable ? "text-[#9a3b35]" : "text-ink-soft"}`} role="status">
+              <p className={`mt-4 text-xs ${serverUnreachable ? "text-danger-strong" : "text-ink-soft"}`} role="status">
                 {serverUnreachable
                   ? "Can't reach the YuriWoori server, so your saved details can't be checked yet. Retrying automatically…"
                   : "Checking your saved details…"}
