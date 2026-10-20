@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test tests/routinePlan.test.mjs tests/cartLogic.test.mjs tests/apiErrors.test.mjs tests/whatsapp.test.mjs tests/camera.test.mjs tests/contact.test.mjs tests/reportView.test.mjs tests/pricing.test.mjs tests/reportPhoto.test.mjs tests/productImage.test.mjs tests/captureLifecycle.test.mjs"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "1.0.1",
+    "framer-motion": "^13.4.2",
     "lucide-react": "^0.469.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

@@ -4,6 +4,11 @@ Imports the REAL YuriWoori catalogue from a Shopify product export CSV
 prices, images, and — critically — real INCI ingredient lists straight from
 your product admin. Nothing here is invented; unmapped/blank fields stay
 blank rather than being guessed.
+
+LEGACY: the app no longer chooses products from this data. The live store
+(app/services/live_catalogue.py) is the catalogue, and rows written here are
+overwritten with live data whenever the app serves those products. For a
+full record of the live catalogue use scripts/sync_catalogue.py instead.
 """
 
 import csv
@@ -19,7 +24,7 @@ from app.db.models import Product, Ingredient, ProductIngredient
 
 CSV_PATH = os.path.join("data", "products_export.csv")
 
-from app.services.catalogue_csv import (  # shared with the catalogue API
+from app.services.catalogue_csv import (  # the same rules the live catalogue applies
     derive_category_and_step,
     derive_concern_tags,
     is_bundle,

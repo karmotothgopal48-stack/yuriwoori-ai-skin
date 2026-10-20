@@ -12,6 +12,10 @@ __pycache__/
 # Secrets and local config
 .env
 .env.local
+# Credentials for the customer follow-up spreadsheet: never commit them (keep keys outside the project)
+.secrets/
+*service-account*.json
+*service_account*.json
 
 # Saved scan photos (personal images)
 backend/app/uploads/

@@ -1,0 +1,2 @@
+# Installed with: pip install --no-deps -r requirements-mediapipe.txt  (see requirements.txt)
+mediapipe==1.0.1

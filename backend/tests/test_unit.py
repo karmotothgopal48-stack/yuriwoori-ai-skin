@@ -104,3 +104,34 @@ def test_progress_reports_only_meaningful_changes():
 
 def test_progress_empty():
     assert build_progress_series([]) == {"snapshots": [], "meaningful_changes": []}
+
+
+def test_recommendation_reason_lists_shared_phrase_once():
+    from app.services.recommendation import build_recommendations
+
+    product = SimpleNamespace(name="Tone Serum", routine_step="treat", category="serum", price=100.0, available=True,
+                              variant_id=1, concern_tags=("brightening", "uneven-tone"))
+    profile = SimpleNamespace(redness=0, pigmentation=60, blemish_index=0, pore_visibility=0, oiliness=0, hydration=80)
+    [item] = build_recommendations(profile, [product])
+    assert item["match_reason"] == "Matches your scan: helps even out uneven tone."
+    # each matched concern: 10 + 10 x severity ((60 - 40) / 60 = 1/3)
+    assert item["score"] == round(2 * (10 + 10 / 3))
+
+
+def test_unhandled_errors_keep_cors_headers_and_json_body():
+    # Without this, an unexpected 500 reached the browser without CORS headers and the frontend
+    # showed "Can't reach the YuriWoori server" instead of an error.
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    path = "/v1/__test_unhandled_error"
+    if not any(getattr(r, "path", None) == path for r in app.routes):
+        @app.get(path)
+        def _boom():
+            raise RuntimeError("boom")
+
+    r = TestClient(app, raise_server_exceptions=False).get(path, headers={"Origin": "http://localhost:2999"})
+    assert r.status_code == 500
+    assert r.headers.get("access-control-allow-origin") == "http://localhost:2999"
+    assert "detail" in r.json()
