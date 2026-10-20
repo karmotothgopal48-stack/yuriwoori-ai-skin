@@ -35,8 +35,9 @@ FROM python:3.11-slim AS runtime
 
 WORKDIR /app
 
-# Runtime shared libraries opencv-python-headless dynamically links against.
-RUN apt-get update     && apt-get install -y --no-install-recommends libgl1 libglib2.0-0     && rm -rf /var/lib/apt/lists/*     && useradd --create-home --uid 10001 appuser
+# Runtime shared libraries opencv-python-headless dynamically links against, plus EGL/GLES, which MediaPipe's
+# face and hand landmarkers load at runtime (without them every analysis fails: "libEGL.so.1: cannot open").
+RUN apt-get update     && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libegl1 libgles2     && rm -rf /var/lib/apt/lists/*     && useradd --create-home --uid 10001 appuser
 
 COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /opt/hf-cache /opt/hf-cache
