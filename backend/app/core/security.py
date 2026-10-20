@@ -1,14 +1,9 @@
-"""Session tokens and the admin password check.
+"""Customer session tokens.
 
 Tokens are signed JWTs (HS256, JWT_SECRET) carrying only a subject id and a role:
-no name, email or other personal data is put in a token. The admin password is
-stored only as a PBKDF2-SHA256 hash (ADMIN_PASSWORD_HASH), never in plain text.
+no name, email or other personal data is put in a token.
 """
 
-import base64
-import hashlib
-import hmac
-import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -19,26 +14,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.db.session import get_db
 
-PBKDF2_ITERATIONS = 600_000
-ROLE_USER, ROLE_ADMIN = "user", "admin"
-
-
-def hash_password(password: str, iterations: int = PBKDF2_ITERATIONS) -> str:
-    salt = secrets.token_bytes(16)
-    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, iterations)
-    b64 = lambda b: base64.b64encode(b).decode()
-    return f"pbkdf2_sha256${iterations}${b64(salt)}${b64(digest)}"
-
-
-def verify_password(password: str, stored: str) -> bool:
-    try:
-        algo, iterations, salt, digest = stored.split("$")
-        if algo != "pbkdf2_sha256":
-            return False
-        candidate = hashlib.pbkdf2_hmac("sha256", password.encode(), base64.b64decode(salt), int(iterations))
-        return hmac.compare_digest(candidate, base64.b64decode(digest))
-    except (ValueError, TypeError):
-        return False
+ROLE_USER = "user"
 
 
 def _secret() -> str:
@@ -93,10 +69,3 @@ def client_ip(request: Request) -> str | None:
     Behind a reverse proxy, run uvicorn with --proxy-headers --forwarded-allow-ips=<proxy ip> so this
     is the real client address rather than the proxy's."""
     return request.client.host if request.client else None
-
-
-def require_admin(authorization: str | None = Header(default=None)) -> dict:
-    claims = decode_token(_bearer(authorization, missing="Admin login required."))
-    if claims.get("role") != ROLE_ADMIN:
-        raise HTTPException(status_code=403, detail="Admin access only.")
-    return claims

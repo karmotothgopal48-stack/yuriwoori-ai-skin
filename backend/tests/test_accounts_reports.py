@@ -1,10 +1,9 @@
-"""Signup/session, admin protection and the Excel report builder. No database or network needed:
-protected routes are rejected before any database access, and the workbook is built from an empty report."""
+"""Signup/session and route protection. No database or network needed: protected routes are rejected before any
+database access."""
 
 import os
 import sys
 from datetime import timedelta
-from io import BytesIO
 
 import pytest
 from fastapi import HTTPException
@@ -13,13 +12,11 @@ from pydantic import ValidationError
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from fastapi.testclient import TestClient
-from openpyxl import load_workbook
 
 from app.core import security
 from app.core.config import settings
 from app.main import app
 from app.schemas import EngagementEventRequest, SignupRequest
-from app.services.report_excel import build_workbook
 
 client = TestClient(app)
 
@@ -29,17 +26,9 @@ def _secret(monkeypatch):
     monkeypatch.setattr(settings, "jwt_secret", "x" * 48)
 
 
-def test_password_hash_verifies_and_rejects():
-    h = security.hash_password("correct horse battery", iterations=1000)
-    assert h.startswith("pbkdf2_sha256$1000$") and "correct horse" not in h
-    assert security.verify_password("correct horse battery", h)
-    assert not security.verify_password("wrong password", h)
-    assert not security.verify_password("x", "not-a-hash")
-
-
 def test_token_roundtrip_role_and_expiry():
-    claims = security.decode_token(security.create_token("abc", security.ROLE_ADMIN, timedelta(minutes=5)))
-    assert claims["sub"] == "abc" and claims["role"] == "admin"
+    claims = security.decode_token(security.create_token("abc", security.ROLE_USER, timedelta(minutes=5)))
+    assert claims["sub"] == "abc" and claims["role"] == "user"
     with pytest.raises(HTTPException) as e:
         security.decode_token(security.create_token("abc", security.ROLE_USER, timedelta(seconds=-1)))
     assert e.value.status_code == 401
@@ -76,39 +65,14 @@ def test_scan_reads_require_a_user_session():
         assert client.get(path).status_code == 401, path
 
 
-def test_admin_routes_need_an_admin_token():
-    for path in ("/v1/admin/summary", "/v1/admin/analyses", "/v1/admin/report.xlsx"):
-        assert client.get(path).status_code == 401
-        user_token = security.create_token("00000000-0000-0000-0000-000000000001", security.ROLE_USER, timedelta(minutes=5))
-        assert client.get(path, headers={"Authorization": f"Bearer {user_token}"}).status_code == 403
-
-
-def test_admin_login_rejects_wrong_password(monkeypatch):
-    monkeypatch.setattr(settings, "admin_email", "admin@example.com")
-    monkeypatch.setattr(settings, "admin_password_hash", security.hash_password("right-password-123", iterations=1000))
-    assert client.post("/v1/admin/login", json={"email": "admin@example.com", "password": "nope"}).status_code == 401
-    ok = client.post("/v1/admin/login", json={"email": "ADMIN@example.com", "password": "right-password-123"})
-    assert ok.status_code == 200 and security.decode_token(ok.json()["token"])["role"] == "admin"
-
-
-def test_excel_workbook_has_required_sheets_and_columns():
-    empty = {"summary": {"registered_users": 0, "scans_started": 0, "completed_analyses": 0, "unique_users_analyzed": 0,
-                         "analyses_with_recommendations": 0, "products_recommended": 0, "analyses_recommendations_viewed": 0,
-                         "product_clicks": 0, "analyses_with_product_click": 0, "unique_products_clicked": 0,
-                         "confirmed_purchases": None, "purchase_tracking": "Not available", "funnel": [
-                             {"stage": "Registered users", "count": 0, "pct_of_previous": None},
-                             {"stage": "Confirmed purchases", "count": None, "pct_of_previous": None}],
-                         "timezone": "IST (UTC+05:30)", "generated_at": "2026-01-01 00:00:00"},
-             "analyses": [], "users": [], "recommendations": [], "clicks": [], "product_engagement": []}
-    wb = load_workbook(BytesIO(build_workbook(empty)))
-    assert wb.sheetnames == ["Summary", "Analyses", "Users", "Recommendations", "Product Clicks", "Notes"]
-    headers = [c.value for c in wb["Analyses"][1]]
-    for col in ("User Name", "Email", "Analysis ID", "Date", "Time", "IP Address", "Skin Type", "Detected Concerns",
-                "Recommended Products", "Product Clicked", "Purchase Status"):
-        assert col in headers
-    assert wb["Analyses"].max_row == 1  # no invented rows
-    summary = {r[0].value: r[1].value for r in wb["Summary"].iter_rows() if r[0].value}
-    assert summary["Confirmed purchases"] == "Not available"
+def test_there_is_no_admin_area():
+    # Removed on purpose: no admin login, no customer listing or export, no admin role on the API.
+    assert not [r.path for r in app.routes if "/admin" in getattr(r, "path", "")]
+    for method, path in (("POST", "/v1/admin/login"), ("GET", "/v1/admin/summary"), ("GET", "/v1/admin/analyses"),
+                         ("GET", "/v1/admin/report.xlsx"), ("GET", "/v1/admin/customer-sheet")):
+        assert client.request(method, path).status_code == 404, path
+    assert not hasattr(security, "ROLE_ADMIN") and not hasattr(security, "require_admin")
+    assert not hasattr(settings, "admin_email") and not hasattr(settings, "admin_password_hash")
 
 
 def test_health_at_root_and_v1():

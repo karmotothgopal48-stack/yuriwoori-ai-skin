@@ -90,22 +90,33 @@ export default function Processing({ go, photo, setPhoto, bodyPart, setAnalysis,
   const [error, setError] = useState(null);
   const [attempt, setAttempt] = useState(0);
   const started = useRef(-1);
+  // false once the customer has left this screen (exit, retake, sign-out): an analysis still running then is
+  // abandoned. Its late result or error is ignored, so it can't bring the photo back or navigate them to results.
+  // (Its own effect, so React StrictMode's mount-unmount-mount check doesn't cancel the real run.)
+  const onScreen = useRef(true);
+  const toResults = useRef(null);
+  useEffect(() => {
+    onScreen.current = true;
+    return () => { onScreen.current = false; clearTimeout(toResults.current); };
+  }, []);
 
   useEffect(() => {
     if (started.current === attempt || !photo) return;
     started.current = attempt;
     setError(null); setStage("upload");
 
-    analyzeSkin(photo, setStage, bodyPart)
+    analyzeSkin(photo, (s) => { if (onScreen.current) setStage(s); }, bodyPart)
       .then((res) => {
+        if (!onScreen.current) return; // abandoned: no results, no report photo, no navigation
         setAnalysis(res);
         // The server never kept the photo. For this scan's report it stays in this tab's memory only (an object URL
         // bound to res.scanId, released on a new scan, home or sign-out); the capture itself is let go of here.
         // After a failed analysis it stays in memory only, for "Try again".
         setReportPhoto?.(createReportPhoto(photo, res.scanId));
-        setTimeout(() => { go("profile"); setPhoto?.(null); }, 900); // let the last tick render
+        toResults.current = setTimeout(() => { if (onScreen.current) { go("profile"); setPhoto?.(null); } }, 900); // let the last tick render
       })
       .catch((e) => {
+        if (!onScreen.current) return; // abandoned: nothing to show
         // the technical cause stays visible to developers; the user gets the matching advice
         if (import.meta.env.DEV) console.warn("[skin analysis] failed", { status: e.status, reason: e.reason, kind: e.kind, message: e.message });
         setError({

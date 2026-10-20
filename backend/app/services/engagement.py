@@ -1,7 +1,7 @@
 """Records what each signed-up user was recommended, saw and clicked.
 
 - The ranked product list served for a scan is snapshotted once into the existing
-  `recommendations` table, so reports show what the user was actually offered.
+  `recommendations` table: what the user was actually offered (a click is accepted only for one of these).
 - `engagement_events` stores "recommendations shown" and "product clicked" rows.
 Product handles and URLs always come from the live store catalogue (as recorded in the products table
 when they were served), never from the browser.

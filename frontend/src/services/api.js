@@ -1,5 +1,5 @@
 /* Thin client for the YuriWoori FastAPI backend (see backend app/api/v1). */
-import { getAdminToken, getUserToken } from "./session";
+import { getUserToken } from "./session";
 import { describeFailure, detailText } from "./apiErrors";
 
 // 127.0.0.1, not "localhost": the backend binds IPv4 only, and "localhost" resolves to ::1 first on Windows.
@@ -16,7 +16,7 @@ export class ApiError extends Error {
 
 /**
  * @param {string} path  e.g. "/scans"
- * @param {{method?: string, body?: any, auth?: "user"|"admin"|false, raw?: boolean, keepalive?: boolean, headers?: object}} opts
+ * @param {{method?: string, body?: any, auth?: "user"|false, raw?: boolean, keepalive?: boolean, headers?: object}} opts
  *   auth: which session token to send (default: the user token when one exists)
  *   raw:  return the Response (for file downloads) instead of parsed JSON
  *   headers: extra request headers (e.g. X-Report-Token for a report link)
@@ -24,7 +24,7 @@ export class ApiError extends Error {
 export async function api(path, { method = "GET", body, auth = "user", raw = false, keepalive = false, headers: extra = {} } = {}) {
   const headers = { ...extra };
   if (body) headers["Content-Type"] = "application/json";
-  const token = auth === "admin" ? getAdminToken() : auth === "user" ? getUserToken() : null;
+  const token = auth === "user" ? getUserToken() : null;
   if (token) headers.Authorization = `Bearer ${token}`;
 
   let res;

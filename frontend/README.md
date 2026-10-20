@@ -34,14 +34,14 @@ Navigation is a simple state machine in `src/App.jsx` (no router). The header sh
 start → signup → permission → tips → camera → review → processing
       → profile → concerns → routine → products → (official yuriwoori.com product page)
 assistant (Ask Yuri) is reachable from Start, Routine and Products, outside the numbered steps
-/admin  → protected admin dashboard (separate app: login, metrics, analyses table, Export Excel)
+/report → a customer's report from its secure link (standalone, no session needed)
 ```
 
-Signup (name + email + required privacy-notice consent) must happen before any camera step; a saved session is
-checked with `GET /users/me` on load. Only the session token is kept in the browser (`localStorage`); the admin
-token lives in `sessionStorage` and ends with the tab. Opening a product page from a routine step also sends a
-best-effort `product_clicked` event, and reaching the Routine screen sends `recommendations_shown`; tracking never
-blocks the link. `/admin` needs the static host to serve `index.html` for that path (Vite dev does).
+There is no admin area. Signup (name + email + required privacy-notice consent) must happen before any camera step;
+a saved session is checked with `GET /users/me` on load. Only the session token is kept in the browser
+(`localStorage`). Opening a product page from a routine step also sends a best-effort `product_clicked` event, and
+reaching the Routine screen sends `recommendations_shown`; tracking never blocks the link. `/report` needs the static
+host to serve `index.html` for that path (Vite dev does).
 
 | Screen | What it does |
 |---|---|

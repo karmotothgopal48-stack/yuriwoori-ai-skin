@@ -227,7 +227,7 @@ def get_recommendations(scan_id: uuid.UUID, user: User = Depends(current_user), 
 
     results = build_recommendations(profile, get_catalogue().products, body_part=body_part_of(scan.angles_captured))
     rows = ensure_product_rows(db, [item["product"] for item in results])
-    snapshot_recommendations(db, profile, results)  # first-served ranking, kept for the admin report (commits)
+    snapshot_recommendations(db, profile, results)  # first-served ranking, kept as what was offered (commits)
     return [
         RecommendationResponse(
             product_id=rows[item["product"].handle].id,

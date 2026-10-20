@@ -257,7 +257,7 @@ def run_in_background() -> None:
         db.close()
 
 
-# ---------- admin tools (scripts/customer_sheet.py) ----------
+# ---------- operator tools (scripts/customer_sheet.py) ----------
 
 
 def status_counts(db: Session) -> dict:

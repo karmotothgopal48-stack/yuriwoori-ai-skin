@@ -10,14 +10,10 @@ class Settings(BaseSettings):
     environment: str = "development"
     backend_port: int = 8000
     database_url: str = ""
-    # Signs user and admin session tokens (app/core/security.py). Must be a long random value.
+    # Signs customer session tokens (app/core/security.py) and report links. Must be a long random value.
     jwt_secret: str = ""
-    jwt_expires_in: int = 3600  # admin session lifetime, seconds
     user_token_days: int = 30  # signed-up user session lifetime
 
-    # Single admin account for the reports area. Set with: python scripts/set_admin_password.py
-    admin_email: str = ""
-    admin_password_hash: str = ""
     # Comma-separated list of allowed browser origins (CORS).
     frontend_origin: str = "http://localhost:2999,http://127.0.0.1:2999,http://localhost:3000"
 

@@ -165,7 +165,7 @@ Settings are read from `.env` (see `app/core/config.py`). Never commit `.env`.
 | `ANTHROPIC_API_KEY` | For chat | Powers `/v1/coach/message`. Missing key → `503`; out of credits → `503` with a "console.anthropic.com" hint; other API failure → `502` with Anthropic's own message. |
 | `SHOPIFY_STORE_DOMAIN` | For checkout | Store domain, e.g. `your-store.myshopify.com`. |
 | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | For checkout | Storefront API token. |
-| `JWT_SECRET` | No | Reserved for future auth (unused). |
+| `JWT_SECRET` | Yes | Signs customer session tokens and report links (min 32 chars). Generate one with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. Rotating it signs every customer out and invalidates all report links. |
 | `BACKEND_PORT`, `ENVIRONMENT` | No | Defaults `8000` / `development`. |
 
 ## Running the server
@@ -178,7 +178,7 @@ venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --r
 - Health check: <http://localhost:8000/v1/health> → `{"status":"ok","service":"yuriwoori-backend"}`
 - The server speaks **plain HTTP**. Point clients at `http://`, not `https://`.
 - Without `--reload`, code changes only apply after a manual restart.
-- **Production must use HTTPS.** Plain HTTP is for local development only: user and admin session tokens,
+- **Production must use HTTPS.** Plain HTTP is for local development only: customer session tokens,
   names, emails and selfies travel in these requests. Put the API behind a TLS-terminating reverse proxy or load
   balancer, set `FRONTEND_ORIGIN` to the real `https://` site origin, and run uvicorn with
   `--proxy-headers --forwarded-allow-ips=<proxy ip>` so the recorded client IP is the visitor's, not the proxy's.
@@ -263,7 +263,7 @@ Try it without a scan: `GET /v1/catalogue/recommendations?hydration=30&redness=5
 | POST | `/shopping-agent/build` | `{message, scan_id?}` — parses a budget ("₹2000", "2k") and builds a cart of real products that fits it. |
 | POST | `/shopify/checkout/{cart_id}` | Creates a Shopify cart and returns `checkout_url` (+ `unresolved_products`). Needs Shopify config and resolved variant IDs. |
 
-### Users, engagement tracking and admin reports
+### Users and engagement tracking
 
 Signup is required before a scan. There is no password: name + WhatsApp + email + accepted privacy notice returns a
 signed session token (`Authorization: Bearer …`) for a new email. An email that already has an account is only opened
@@ -277,22 +277,19 @@ email therefore never opens their results. The sign-in code also counts as email
 | GET | `/users/me` | user | The signed-up user for the token. |
 | POST | `/scans` | user | Now requires a user token; the scan is linked to the user and the **server-side** request IP is stored. `/frames` and `/analyze` only accept the scan's own user (`403` otherwise). |
 | POST | `/events` | user | `{event_type: "recommendations_shown" \| "product_clicked", scan_id, product_handle?}`. "Shown" is recorded once per scan (one row per offered product); a click is accepted only for a product this scan recommended or put in its routine, and the URL stored is the catalogue's. |
-| POST | `/admin/login` | — | `{email, password}` checked against `ADMIN_EMAIL` / `ADMIN_PASSWORD_HASH` → admin token (`JWT_EXPIRES_IN` seconds). |
-| GET | `/admin/summary` | admin | Totals and funnel (registered users → analyses → recommendations → viewed → clicked → purchases). |
-| GET | `/admin/analyses` | admin | One row per completed analysis: name, email, analysis id, date/time (IST), IP, skin type, detected concerns, recommended products, viewed, clicked products, purchase status. |
-| GET | `/admin/report.xlsx` | admin | Excel export: Summary, Analyses, Users, Recommendations, Product Clicks, Notes. |
+
+There is no admin area: no admin login, no `/admin` routes, and no customer listing or Excel export over the API.
 
 The ranked product list served by `/catalogue/recommendations?scan_id=` for a signed-up user is stored once in
-`recommendations`, so reports show what the user was actually offered.
+`recommendations`: what the user was actually offered (a `product_clicked` event is accepted only for one of these).
 
-**Purchases are not tracked.** A product click is not a purchase. Purchase status is always
-"Not confirmed (no order integration)" until a Shopify order integration exists: an Admin API token with
-`read_orders` or an `orders/create` webhook (plus its signing secret), a public HTTPS backend URL, and a way to tie an
-order to a scan (for example a Storefront cart carrying the scan id as a cart attribute).
+**Purchases are not tracked.** A product click is not a purchase. Tracking purchases would need a Shopify order
+integration: an Admin API token with `read_orders` or an `orders/create` webhook (plus its signing secret), a public
+HTTPS backend URL, and a way to tie an order to a scan (for example a Storefront cart carrying the scan id as a cart
+attribute).
 
-Set the admin login (writes a PBKDF2 hash, never the password, and generates `JWT_SECRET` if missing):
-`python scripts/set_admin_password.py <admin-email>`. Behind a reverse proxy, run Uvicorn with
-`--proxy-headers --forwarded-allow-ips=<proxy ip>` so the stored IP is the client's, not the proxy's.
+Behind a reverse proxy, run Uvicorn with `--proxy-headers --forwarded-allow-ips=<proxy ip>` so the stored IP is the
+client's, not the proxy's.
 
 ## Skin-analysis reports and delivery — `/reports`, `/delivery`
 When an analysis is **saved**, the backend itself makes the scan's report record and sends it on every ready channel

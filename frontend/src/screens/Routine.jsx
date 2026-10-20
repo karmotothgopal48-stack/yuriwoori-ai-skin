@@ -341,7 +341,7 @@ export default function Routine({ go, analysis, setAnalysis }) {
       .catch(() => { if (alive) setLiveData((d) => ({ ...d, status: "error" })); });
     return () => { alive = false; };
   }, [handleKey, liveAttempt]);
-  // What was offered is recorded once per scan for the admin report (backend engagement events).
+  // What was offered is recorded once per scan (backend engagement events).
   useEffect(() => { if (handleKey) trackRecommendationsShown(analysis?.scanId); }, [handleKey, analysis?.scanId]);
 
   const overview = withRoutine && entries.length > 0 && (

@@ -330,7 +330,7 @@ class LiveCatalogueResponse(BaseModel):
     products: list[LiveProduct]
 
 
-# ---------- users, engagement tracking, admin reports ----------
+# ---------- users, engagement tracking ----------
 
 EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
@@ -425,13 +425,3 @@ class EngagementEventRequest(BaseModel):
 
 class EngagementEventResponse(BaseModel):
     recorded: int
-
-
-class AdminLoginRequest(BaseModel):
-    email: str = Field(max_length=254)
-    password: str = Field(max_length=200)
-
-
-class AdminLoginResponse(BaseModel):
-    token: str
-    expires_in: int

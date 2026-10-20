@@ -132,7 +132,7 @@ def catalogue_recommendations(
     catalogue = get_catalogue()
     concerns, ranked = recommend(metrics, catalogue.products, limit_per_step, body_part)
     if scan_id and profile.user_id and limit_per_step == 2:
-        # what the app shows a signed-up user for this scan, kept for the admin report (first serve only)
+        # what the app shows a signed-up user for this scan, kept as what was offered (first serve only)
         snapshot_recommendations(db, profile, ranked)
     return CatalogueRecommendationsResponse(
         scan_id=scan_id,

@@ -561,7 +561,7 @@ def test_replies_are_not_forwarded_without_a_team_address(db, outbox, monkeypatc
     assert r.status_code == 200 and r.json()["forwarded"] == 0 and outbox == []
 
 
-# ---------- Phase A: backend-triggered delivery, reports generated in memory, WhatsApp media clean-up, admin ----------
+# ---------- Phase A: backend-triggered delivery, reports generated in memory, WhatsApp media clean-up, sheet status ----------
 
 
 def test_after_an_analysis_the_backend_sends_the_report_to_the_verified_owner_once(db, outbox):
@@ -690,25 +690,20 @@ def test_leftover_whatsapp_uploads_are_purged_after_a_while(db, outbox, media):
     assert row.provider_media_id is None and media["deleted"] == ["media-1"]
 
 
-def test_the_sheet_sync_status_is_for_admins_only_and_shows_no_contact_details(db):
-    from app.core.security import ROLE_ADMIN, create_token
+def test_the_sheet_sync_status_counts_show_no_contact_details(db):
+    # what `python scripts/customer_sheet.py status` prints; there is no web view of it (no admin area)
     from app.db.models import CustomerSheetSync
-    scan = make_scan(db, email_prefix="sheet-admin")
+    from app.services import customer_sheet
+    scan = make_scan(db, email_prefix="sheet-status")
     owner = db.get(User, scan.user_id)
     db.add(CustomerSheetSync(user_id=owner.id, status="failed", wanted_version=1, synced_version=0, attempts=2,
                              last_error="quota_RESOURCE_EXHAUSTED", next_attempt_at=datetime.utcnow()))
     db.flush()
-    assert client.get("/v1/admin/customer-sheet").status_code == 401
-    assert client.get("/v1/admin/customer-sheet", headers=scan.headers).status_code == 403  # a customer's session
-    admin = {"Authorization": f"Bearer {create_token('admin', ROLE_ADMIN, timedelta(minutes=5))}"}
-    r = client.get("/v1/admin/customer-sheet", headers=admin)
-    assert r.status_code == 200
-    body = r.json()
-    assert body["enabled"] is False and body["by_status"].get("failed", 0) >= 1
-    assert body["failed_by_error"].get("quota_RESOURCE_EXHAUSTED", 0) >= 1
-    mine = next(i for i in body["items"] if i["customer_id"] == str(owner.id))
-    assert mine["status"] == "failed" and mine["attempts"] == 2
-    assert owner.email not in r.text and owner.whatsapp not in r.text and "Test" not in json.dumps(mine)
+    counts = customer_sheet.status_counts(db)
+    assert counts["by_status"].get("failed", 0) >= 1
+    assert counts["failed_by_error"].get("quota_RESOURCE_EXHAUSTED", 0) >= 1
+    assert owner.email not in json.dumps(counts) and owner.whatsapp not in json.dumps(counts)
+    assert client.get("/v1/admin/customer-sheet", headers=scan.headers).status_code == 404
 
 
 # ---------- report retention: existing reports preserved as they are, new reports never stored ----------

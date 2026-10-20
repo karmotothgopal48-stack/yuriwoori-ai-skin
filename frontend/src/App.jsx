@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { Header } from "./components/Header";
 import Start from "./screens/Start";
@@ -14,12 +14,12 @@ import Routine from "./screens/Routine";
 import Assistant from "./screens/Assistant";
 import { CartButton, CartDrawer } from "./components/Cart";
 import { CartProvider } from "./services/cart";
-import AdminApp from "./admin/AdminApp";
 import Report from "./screens/Report";
 import { fetchMe } from "./services/skinAnalysis";
 import { getUserToken, setUserToken } from "./services/session";
 import { sessionRejected } from "./services/apiErrors";
 import { releaseReportPhoto, reportPhotoFor } from "./services/reportPhoto";
+import { keepsCapture } from "./services/captureLifecycle";
 
 // Numbered steps shown in the header. Start and the Ask Yuri chat sit outside the flow. The routine is the
 // only place products are recommended (morning + evening, each with Add to cart); there is no separate
@@ -41,9 +41,7 @@ const variants = {
 };
 
 export default function App() {
-  // The admin area is a separate, protected app at /admin (no user flow, no shared state).
   const path = window.location.pathname.replace(/\/+$/, "");
-  if (path === "/admin") return <AdminApp />;
   // A customer's report from its secure link (/report#t=<token>): standalone, no session needed.
   if (path === "/report") return <Report />;
   return <CartProvider><SkinAnalysisApp /></CartProvider>;
@@ -97,6 +95,25 @@ function SkinAnalysisApp() {
 
   // Leaving the report (home, or a new scan starting) lets go of its photo
   useEffect(() => { if (["start", "about", "camera"].includes(screen)) setReportPhoto(null); }, [screen]);
+  // NO SELFIE STORAGE: the captured photo is kept only while Review or the analysis is on screen. Exiting (home, ✕),
+  // restarting (details, camera / retake, tips) and completing (results) all release it (services/captureLifecycle.js).
+  useEffect(() => { if (!keepsCapture(screen)) setPhoto(null); }, [screen]);
+
+  // Closing the tab, navigating away or entering the back/forward cache: release both photos right away (the report
+  // link is revoked here, not after a render that a frozen or unloading page may never get), and never come back to
+  // an empty Review or analysis screen.
+  const latest = useRef({ screen, reportPhoto });
+  latest.current = { screen, reportPhoto };
+  useEffect(() => {
+    const release = () => {
+      releaseReportPhoto(latest.current.reportPhoto);
+      setReportPhoto(null);
+      setPhoto(null);
+      if (keepsCapture(latest.current.screen)) go("start");
+    };
+    window.addEventListener("pagehide", release);
+    return () => window.removeEventListener("pagehide", release);
+  }, [go]);
 
   const Screen = SCREENS[screen];
   const isStart = screen === "start";
